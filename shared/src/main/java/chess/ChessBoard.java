@@ -7,7 +7,7 @@ package chess;
  * signature of the existing methods.
  */
 public class ChessBoard {
-
+    private ChessPiece[][] tiles = new ChessPiece[8][8];
     public ChessBoard() {
         
     }
@@ -19,7 +19,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        throw new RuntimeException("Not implemented");
+        tiles[position.getRow()][position.getColumn()] = piece;
     }
 
     /**
@@ -30,7 +30,8 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        throw new RuntimeException("Not implemented");
+        //throw new RuntimeException("Not implemented");
+        return tiles[position.getRow()][position.getColumn()];
     }
 
     /**
