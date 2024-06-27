@@ -53,7 +53,36 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+        //Check if piece is Bishop. If so, calculate moves based on bishop.
 
+        if(type == ChessPiece.PieceType.BISHOP) {
+            return CalculateBishopMoves(board, myPosition);
+        }
         return new ArrayList<>();
+    }
+    public void BishopMoveHelper(ChessPosition myPosition, Collection<ChessMove> moves, int x, int y) {
+        if(x<=8 && x>=1 && y<=8 && y>=1){
+            moves.add(new chess.ChessMove(myPosition, new ChessPosition(x, y), null));
+        }
+    }
+    public Collection<ChessMove> CalculateBishopMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> moves = new ArrayList<>();
+
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+
+        for(int i = 1; i < 8; i++) {
+            BishopMoveHelper(myPosition, moves, row+i, col+i);
+        }
+        for(int i = 1; i < 8; i++) {
+            BishopMoveHelper(myPosition, moves, row-i, col+i);
+        }
+        for(int i = 1; i < 8; i++) {
+            BishopMoveHelper(myPosition, moves, row-i, col-i);
+        }
+        for(int i = 1; i < 8; i++) {
+            BishopMoveHelper(myPosition, moves, row+i, col-i);
+        }
+        return moves;
     }
 }
