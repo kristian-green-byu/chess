@@ -32,6 +32,11 @@ public class ChessPiece {
         this.type = type;
     }
 
+    @Override
+    public String toString() {
+        return pieceColor + " " + type + " ";
+    }
+
     /**
      * The various different chess piece options
      */
@@ -125,12 +130,12 @@ public class ChessPiece {
             ChessPosition desiredPosition = new ChessPosition(x, y);
             ChessPosition frontLeft = new ChessPosition(x, y-1);
             ChessPosition frontRight = new ChessPosition(x, y+1);
-            if(board.getPiece(frontLeft)!=null) {
+            if(y-1>0 && board.getPiece(frontLeft)!=null) {
                 if(board.getPiece(frontLeft).getTeamColor()!=pieceColor) {
                     moves.add(new chess.ChessMove(myPosition, frontLeft, promotionPiece));
                 }
             }
-            if(board.getPiece(frontRight)!=null) {
+            if(y+1 < 8 && board.getPiece(frontRight)!=null) {
                 if(board.getPiece(frontRight).getTeamColor()!=pieceColor) {
                     moves.add(new chess.ChessMove(myPosition, frontRight, promotionPiece));
                 }

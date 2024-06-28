@@ -12,7 +12,6 @@ import java.util.Objects;
 public class ChessBoard {
     private ChessPiece[][] tiles = new ChessPiece[8][8];
     public ChessBoard() {
-        
     }
 
     @Override
@@ -26,6 +25,23 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(tiles);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder chessBoardString = new StringBuilder();
+        for(int i = 0; i < 8; i++) {
+            for(int j =0; j < 8; j++) {
+                if(tiles[i][j] != null) {
+                    chessBoardString.append('|').append(tiles[i][j].toString()).append('|');
+                }
+                else {
+                    chessBoardString.append("| |");
+                }
+            }
+            chessBoardString.append("\n");
+        }
+        return chessBoardString.toString();
     }
 
     /**
@@ -54,6 +70,33 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        var board = new ChessBoard();
+        //Add in black and white Pawns
+        for (int i = 1; i <= 8; i++) {
+            board.addPiece(new ChessPosition(2, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+            board.addPiece(new ChessPosition(7, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+        }
+        //Add in black and white Rooks
+        for(int i = 1; i <= 8; i += 7) {
+            board.addPiece(new ChessPosition(1, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
+            board.addPiece(new ChessPosition(8, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
+        }
+        //Add in Knights
+        for(int i = 2; i <= 7; i += 5) {
+            board.addPiece(new ChessPosition(1, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
+            board.addPiece(new ChessPosition(8, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
+        }
+        //Add in Bishops
+        for(int i = 3; i <= 6; i += 3) {
+            board.addPiece(new ChessPosition(1, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
+            board.addPiece(new ChessPosition(8, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
+        }
+        //Add in Queens
+        board.addPiece(new ChessPosition(1, 4), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN));
+        board.addPiece(new ChessPosition(8, 4), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN));
+        //Add in Kings
+        board.addPiece(new ChessPosition(1, 5), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING));
+        board.addPiece(new ChessPosition(8, 5), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
+        this.tiles = board.tiles;
     }
 }
