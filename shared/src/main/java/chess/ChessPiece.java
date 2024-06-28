@@ -71,9 +71,26 @@ public class ChessPiece {
         if(type == ChessPiece.PieceType.BISHOP) {
             return CalculateBishopMoves(board, myPosition);
         }
+        else if(type == ChessPiece.PieceType.KING) {
+            return CalculateKingMoves(board, myPosition);
+        }
         return new ArrayList<>();
     }
-    public boolean BishopMoveHelper(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, int x, int y) {
+    public Collection<ChessMove> CalculateKingMoves(ChessBoard board, ChessPosition myPosition) {
+        Collection<ChessMove> moves = new ArrayList<>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        MoveHelper(board, myPosition, moves, row+1, col);
+        MoveHelper(board, myPosition, moves, row+1, col+1);
+        MoveHelper(board, myPosition, moves, row+1, col-1);
+        MoveHelper(board, myPosition, moves, row, col-1);
+        MoveHelper(board, myPosition, moves, row, col+1);
+        MoveHelper(board, myPosition, moves, row-1, col);
+        MoveHelper(board, myPosition, moves, row-1, col+1);
+        MoveHelper(board, myPosition, moves, row-1, col-1);
+        return moves;
+    }
+    public boolean MoveHelper(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, int x, int y) {
         if(x<=8 && x>=1 && y<=8 && y>=1){
             ChessPosition desiredPosition = new ChessPosition(x, y);
             if(board.getPiece(desiredPosition)==null) {
@@ -91,31 +108,28 @@ public class ChessPiece {
     }
     public Collection<ChessMove> CalculateBishopMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
-
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
-
         for(int i = 1; i < 8; i++) {
-            if(!BishopMoveHelper(board, myPosition, moves, row+i, col+i)) {
+            if(!MoveHelper(board, myPosition, moves, row+i, col+i)) {
                 break;
             }
         }
         for(int i = 1; i < 8; i++) {
-            if(!BishopMoveHelper(board, myPosition, moves, row-i, col+i)) {
+            if(!MoveHelper(board, myPosition, moves, row-i, col+i)) {
                 break;
             }
         }
         for(int i = 1; i < 8; i++) {
-            if(!BishopMoveHelper(board, myPosition, moves, row+i, col-i)) {
+            if(!MoveHelper(board, myPosition, moves, row+i, col-i)) {
                 break;
             }
         }
         for(int i = 1; i < 8; i++) {
-            if(!BishopMoveHelper(board, myPosition, moves, row-i, col-i)) {
+            if(!MoveHelper(board, myPosition, moves, row-i, col-i)) {
                 break;
             }
         }
         return moves;
     }
-
 }
