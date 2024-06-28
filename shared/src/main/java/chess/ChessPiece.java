@@ -73,10 +73,21 @@ public class ChessPiece {
         }
         return new ArrayList<>();
     }
-    public void BishopMoveHelper(ChessPosition myPosition, Collection<ChessMove> moves, int x, int y) {
+    public boolean BishopMoveHelper(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, int x, int y) {
         if(x<=8 && x>=1 && y<=8 && y>=1){
-            moves.add(new chess.ChessMove(myPosition, new ChessPosition(x, y), null));
+            ChessPosition desiredPosition = new ChessPosition(x, y);
+            if(board.getPiece(desiredPosition)==null) {
+                moves.add(new chess.ChessMove(myPosition, desiredPosition, null));
+                return true;
+            }
+            else {
+                if(board.getPiece(desiredPosition).getTeamColor()!=pieceColor) {
+                    moves.add(new chess.ChessMove(myPosition, desiredPosition, null));
+                }
+                return false;
+            }
         }
+        return false;
     }
     public Collection<ChessMove> CalculateBishopMoves(ChessBoard board, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
@@ -85,16 +96,24 @@ public class ChessPiece {
         int col = myPosition.getColumn();
 
         for(int i = 1; i < 8; i++) {
-            BishopMoveHelper(myPosition, moves, row+i, col+i);
+            if(!BishopMoveHelper(board, myPosition, moves, row+i, col+i)) {
+                break;
+            }
         }
         for(int i = 1; i < 8; i++) {
-            BishopMoveHelper(myPosition, moves, row-i, col+i);
+            if(!BishopMoveHelper(board, myPosition, moves, row-i, col+i)) {
+                break;
+            }
         }
         for(int i = 1; i < 8; i++) {
-            BishopMoveHelper(myPosition, moves, row-i, col-i);
+            if(!BishopMoveHelper(board, myPosition, moves, row+i, col-i)) {
+                break;
+            }
         }
         for(int i = 1; i < 8; i++) {
-            BishopMoveHelper(myPosition, moves, row+i, col-i);
+            if(!BishopMoveHelper(board, myPosition, moves, row-i, col-i)) {
+                break;
+            }
         }
         return moves;
     }
