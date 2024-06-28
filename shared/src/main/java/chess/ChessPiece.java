@@ -79,8 +79,39 @@ public class ChessPiece {
         else if(type == ChessPiece.PieceType.PAWN) {
             return CalculatePawnMoves(board, myPosition);
         }
+        else if(type == ChessPiece.PieceType.QUEEN) {
+            return CalculateQueenMoves(board, myPosition);
+        }
         return new ArrayList<>();
     }
+    public Collection<ChessMove> CalculateQueenMoves(ChessBoard board, ChessPosition myPosition) {
+        //Calculates possible Queen Moves by combining Rook and Bishop logic.
+        Collection<ChessMove> moves = CalculateBishopMoves(board, myPosition);
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        for(int i = 1; i < 8; i++) {
+            if(!MoveHelper(board, myPosition, moves, row+i, col, null)) {
+                break;
+            }
+        }
+        for(int i = 1; i < 8; i++) {
+            if(!MoveHelper(board, myPosition, moves, row-i, col, null)) {
+                break;
+            }
+        }
+        for(int i = 1; i < 8; i++) {
+            if(!MoveHelper(board, myPosition, moves, row, col-i, null)) {
+                break;
+            }
+        }
+        for(int i = 1; i < 8; i++) {
+            if(!MoveHelper(board, myPosition, moves, row, col+i, null)) {
+                break;
+            }
+        }
+        return moves;
+    }
+
     public boolean PawnHelper(ChessBoard board, ChessPosition myPosition, int x, int y, ChessPiece.PieceType promotionPiece, Collection<ChessMove> moves) {
        //Handles additional functions for calculating pawn moves such as promotion and possible captures
         if(x<=8 && x>=1 && y<=8 && y>=1){
