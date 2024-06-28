@@ -66,7 +66,6 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        //Check if piece is Bishop. If so, calculate moves based on bishop.
 
         if(type == ChessPiece.PieceType.BISHOP) {
             return CalculateBishopMoves(board, myPosition);
@@ -74,9 +73,28 @@ public class ChessPiece {
         else if(type == ChessPiece.PieceType.KING) {
             return CalculateKingMoves(board, myPosition);
         }
+        else if(type == ChessPiece.PieceType.KNIGHT) {
+            return CalculateKnightMoves(board, myPosition);
+        }
         return new ArrayList<>();
     }
+    public Collection<ChessMove> CalculateKnightMoves(ChessBoard board, ChessPosition myPosition) {
+        //Uses MoveHelper function to check all squares next to King to see if moves are available
+        Collection<ChessMove> moves = new ArrayList<>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        MoveHelper(board, myPosition, moves, row+2, col+1);
+        MoveHelper(board, myPosition, moves, row+2, col-1);
+        MoveHelper(board, myPosition, moves, row+1, col-2);
+        MoveHelper(board, myPosition, moves, row+1, col+2);
+        MoveHelper(board, myPosition, moves, row-1, col-2);
+        MoveHelper(board, myPosition, moves, row-1, col+2);
+        MoveHelper(board, myPosition, moves, row-2, col+1);
+        MoveHelper(board, myPosition, moves, row-2, col-1);
+        return moves;
+    }
     public Collection<ChessMove> CalculateKingMoves(ChessBoard board, ChessPosition myPosition) {
+        //Uses MoveHelper function to check all squares next to King to see if moves are available
         Collection<ChessMove> moves = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
@@ -91,6 +109,7 @@ public class ChessPiece {
         return moves;
     }
     public boolean MoveHelper(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, int x, int y) {
+        //Checks if desired move is out of bounds or if piece is already located at desired position
         if(x<=8 && x>=1 && y<=8 && y>=1){
             ChessPosition desiredPosition = new ChessPosition(x, y);
             if(board.getPiece(desiredPosition)==null) {
@@ -107,6 +126,7 @@ public class ChessPiece {
         return false;
     }
     public Collection<ChessMove> CalculateBishopMoves(ChessBoard board, ChessPosition myPosition) {
+        //Calculates all possible diagonal moves for bishop using MoveHelper function.
         Collection<ChessMove> moves = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
