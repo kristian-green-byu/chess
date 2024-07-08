@@ -69,6 +69,19 @@ public class ChessGame {
         ChessPiece piece = chessBoard.getPiece(startPosition);
         if(piece != null) {
             Collection<ChessMove> validMoves = piece.pieceMoves(chessBoard, startPosition);
+            for(ChessMove move : validMoves) {
+                //remove moves that put their own king in check
+                ChessPiece wantedPiece = chessBoard.getPiece(move.getStartPosition());
+                ChessPiece replacePiece = chessBoard.getPiece(move.getEndPosition());
+                chessBoard.addPiece(move.getStartPosition(), null);
+                chessBoard.addPiece(move.getEndPosition(), wantedPiece);
+                updateIsInCheck();
+                if(wantedPiece.getTeamColor() == TeamColor.WHITE && whiteCheck || wantedPiece.getTeamColor() == TeamColor.BLACK && blackCheck){
+                    validMoves.remove(move);
+                }
+                chessBoard.addPiece(move.getEndPosition(),replacePiece);
+                chessBoard.addPiece(move.getStartPosition(), wantedPiece);
+            }
             return validMoves;
         }
         return null;
@@ -100,35 +113,43 @@ public class ChessGame {
         }
     }
 
-    public void updateIsInCheckmate(TeamColor color) {
+    public void updateIsInCheckmate() {
+        updateIsInCheck();
+        if(whiteCheck) {
+            whiteCheckmate = true;
+        }
+        else if(blackCheck) {
+            blackCheckmate = true;
+        }
         for(int i = 8; i >= 1; i--) {
             for(int j =1; j < 9; j++) {
                 ChessPosition position = new ChessPosition(i, j);
                 ChessPiece piece = chessBoard.getPiece(position);
-                if(piece!=null){
-                    if(piece.getTeamColor()==color){
-                        updateIsInCheck();
-                        if(color == TeamColor.WHITE){
-                            if(!whiteCheck){
+                if(piece != null) {
+                    Collection<ChessMove> moves = piece.pieceMoves(chessBoard, position);
+                    for(ChessMove move : moves) {
+                        ChessPiece wantedPiece = chessBoard.getPiece(move.getStartPosition());
+                        if(whiteCheckmate && wantedPiece.getTeamColor() == TeamColor.WHITE || blackCheckmate && wantedPiece.getTeamColor() == TeamColor.BLACK) {
+                            ChessPiece replacePiece = chessBoard.getPiece(move.getEndPosition());
+                            chessBoard.addPiece(move.getStartPosition(), null);
+                            chessBoard.addPiece(move.getEndPosition(), wantedPiece);
+                            updateIsInCheck();
+                            chessBoard.addPiece(move.getEndPosition(),replacePiece);
+                            chessBoard.addPiece(move.getStartPosition(), wantedPiece);
+                            if(whiteCheckmate && !whiteCheck) {
                                 whiteCheckmate = false;
+                                whiteCheck = true;
                                 return;
                             }
-                        }
-                        else if(color == TeamColor.BLACK){
-                            if(!blackCheck){
+                            else if(blackCheckmate && !blackCheck) {
                                 blackCheckmate = false;
+                                blackCheck = true;
                                 return;
                             }
                         }
                     }
                 }
             }
-        }
-        if(color == TeamColor.WHITE){
-            whiteCheckmate = true;
-        }
-        else if (color == TeamColor.BLACK){
-            blackCheckmate = true;
         }
     }
     public void checkStalemate(){
@@ -139,7 +160,7 @@ public class ChessGame {
                 ChessPosition position = new ChessPosition(i, j);
                 ChessPiece piece = chessBoard.getPiece(position);
                 if(piece!=null){
-                    Collection<ChessMove> moves = piece.pieceMoves(chessBoard, position);
+                    Collection<ChessMove> moves = validMoves(position);
                     if(moves!=null){
                         if(piece.getTeamColor()==TeamColor.WHITE){
                             whiteStalemate = false;
@@ -156,12 +177,7 @@ public class ChessGame {
     public void updateFields(){
         updateIsInCheck();
         //if in check, see if in checkmate
-        if(whiteCheck){
-            updateIsInCheckmate(TeamColor.WHITE);
-        }
-        else if(blackCheck){
-            updateIsInCheckmate(TeamColor.BLACK);
-        }
+        updateIsInCheckmate();
         checkStalemate();
     }
     /**
