@@ -131,7 +131,39 @@ public class ChessGame {
             blackCheckmate = true;
         }
     }
+    public void checkStalemate(){
+        whiteStalemate = true;
+        blackStalemate = true;
+        for(int i = 8; i >= 1; i--) {
+            for(int j =1; j < 9; j++) {
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = chessBoard.getPiece(position);
+                if(piece!=null){
+                    Collection<ChessMove> moves = piece.pieceMoves(chessBoard, position);
+                    if(moves!=null){
+                        if(piece.getTeamColor()==TeamColor.WHITE){
+                            whiteStalemate = false;
+                        }
+                        else{
+                            blackStalemate = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
+    public void updateFields(){
+        updateIsInCheck();
+        //if in check, see if in checkmate
+        if(whiteCheck){
+            updateIsInCheckmate(TeamColor.WHITE);
+        }
+        else if(blackCheck){
+            updateIsInCheckmate(TeamColor.BLACK);
+        }
+        checkStalemate();
+    }
     /**
      * Makes a move in a chess game
      *
@@ -151,8 +183,7 @@ public class ChessGame {
             ChessPiece wantedPiece = chessBoard.getPiece(startPosition);
             chessBoard.addPiece(startPosition, null);
             chessBoard.addPiece(move.getEndPosition(), wantedPiece);
-            //check to see if new move put a team in check
-            updateIsInCheck();
+
             //set next turn
             if(wantedPiece.getTeamColor() == TeamColor.WHITE) {
                 teamTurn = TeamColor.BLACK;
@@ -160,13 +191,7 @@ public class ChessGame {
             else{
                 teamTurn = TeamColor.WHITE;
             }
-            //if in check, see if in checkmate
-            if(whiteCheck){
-                updateIsInCheckmate(TeamColor.WHITE);
-            }
-            else if(blackCheck){
-                updateIsInCheckmate(TeamColor.BLACK);
-            }
+            updateFields();
         }
     }
 
@@ -223,6 +248,7 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard board) {
         chessBoard = board;
+        updateFields();
     }
 
     /**
