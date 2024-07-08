@@ -69,7 +69,6 @@ public class ChessGame {
         ChessPiece piece = chessBoard.getPiece(startPosition);
         if(piece != null) {
             Collection<ChessMove> validMoves = piece.pieceMoves(chessBoard, startPosition);
-            updateIsInCheck(validMoves);
             return validMoves;
         }
         return null;
@@ -112,6 +111,9 @@ public class ChessGame {
             ChessPiece wantedPiece = chessBoard.getPiece(startPosition);
             chessBoard.addPiece(startPosition, null);
             chessBoard.addPiece(move.getEndPosition(), wantedPiece);
+            //check to see if new move put a team in check
+            Collection<ChessMove> newValidMoves = validMoves(move.getEndPosition());
+            updateIsInCheck(newValidMoves);
             if(wantedPiece.getTeamColor() == TeamColor.WHITE) {
                 teamTurn = TeamColor.BLACK;
             }
