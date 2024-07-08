@@ -74,21 +74,61 @@ public class ChessGame {
         return null;
     }
 
-    public void updateIsInCheck(Collection<ChessMove> moves) {
-        for(ChessMove move : moves){
-            //algorithm to check if white or black is in check
-            if(chessBoard.getPiece(move.getEndPosition())!=null) {
-                if(chessBoard.getPiece(move.getEndPosition()).getTeamColor()!=chessBoard.getPiece(move.getStartPosition()).getTeamColor()){
-                    if( chessBoard.getPiece(move.getEndPosition()).getPieceType() == ChessPiece.PieceType.KING){
-                        if(chessBoard.getPiece(move.getEndPosition()).getTeamColor() == TeamColor.WHITE){
-                            whiteCheck = true;
-                        }
-                        else {
-                            blackCheck = true;
+    public void updateIsInCheck() {
+        whiteCheck = false;
+        blackCheck = false;
+        for(int i = 8; i >= 1; i--) {
+            for(int j =1; j < 9; j++) {
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = chessBoard.getPiece(position);
+                if(piece != null) {
+                    Collection<ChessMove> moves = piece.pieceMoves(chessBoard, position);
+                    for(ChessMove move : moves) {
+                        if(chessBoard.getPiece(move.getEndPosition()) != null){
+                            if(chessBoard.getPiece(move.getEndPosition()).getPieceType() == ChessPiece.PieceType.KING && chessBoard.getPiece(move.getEndPosition()).getTeamColor() != chessBoard.getPiece(move.getStartPosition()).getTeamColor()){
+                                if(chessBoard.getPiece(move.getEndPosition()).getTeamColor() == TeamColor.WHITE) {
+                                    whiteCheck = true;
+                                }
+                                else if(chessBoard.getPiece(move.getEndPosition()).getTeamColor() == TeamColor.BLACK) {
+                                    blackCheck = true;
+                                }
+                            }
                         }
                     }
                 }
             }
+        }
+    }
+
+    public void updateIsInCheckmate(TeamColor color) {
+        for(int i = 8; i >= 1; i--) {
+            for(int j =1; j < 9; j++) {
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = chessBoard.getPiece(position);
+                if(piece!=null){
+                    if(piece.getTeamColor()==color){
+                        updateIsInCheck();
+                        if(color == TeamColor.WHITE){
+                            if(!whiteCheck){
+                                whiteCheckmate = false;
+                                return;
+                            }
+                        }
+                        else if(color == TeamColor.BLACK){
+                            if(!blackCheck){
+                                blackCheckmate = false;
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if(color == TeamColor.WHITE){
+            whiteCheckmate = true;
+        }
+        else if (color == TeamColor.BLACK){
+            blackCheckmate = true;
         }
     }
 
@@ -112,13 +152,20 @@ public class ChessGame {
             chessBoard.addPiece(startPosition, null);
             chessBoard.addPiece(move.getEndPosition(), wantedPiece);
             //check to see if new move put a team in check
-            Collection<ChessMove> newValidMoves = validMoves(move.getEndPosition());
-            updateIsInCheck(newValidMoves);
+            updateIsInCheck();
+            //set next turn
             if(wantedPiece.getTeamColor() == TeamColor.WHITE) {
                 teamTurn = TeamColor.BLACK;
             }
             else{
                 teamTurn = TeamColor.WHITE;
+            }
+            //if in check, see if in checkmate
+            if(whiteCheck){
+                updateIsInCheckmate(TeamColor.WHITE);
+            }
+            else if(blackCheck){
+                updateIsInCheckmate(TeamColor.BLACK);
             }
         }
     }
