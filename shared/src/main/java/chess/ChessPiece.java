@@ -34,7 +34,47 @@ public class ChessPiece {
 
     @Override
     public String toString() {
-        return pieceColor + " " + type + " ";
+        if (pieceColor == ChessGame.TeamColor.BLACK) {
+          if (type == ChessPiece.PieceType.KING) {
+              return "k";
+          }
+          else if (type == ChessPiece.PieceType.QUEEN) {
+              return "q";
+          }
+          else if (type == ChessPiece.PieceType.KNIGHT) {
+              return "n";
+          }
+          else if (type == ChessPiece.PieceType.BISHOP) {
+              return "b";
+          }
+          else if (type == ChessPiece.PieceType.ROOK) {
+              return "r";
+          }
+          else if (type == ChessPiece.PieceType.PAWN) {
+              return "p";
+          }
+        }
+        else{
+            if (type == ChessPiece.PieceType.KING) {
+                return "K";
+            }
+            else if (type == ChessPiece.PieceType.QUEEN) {
+                return "Q";
+            }
+            else if (type == ChessPiece.PieceType.KNIGHT) {
+                return "N";
+            }
+            else if (type == ChessPiece.PieceType.BISHOP) {
+                return "B";
+            }
+            else if (type == ChessPiece.PieceType.ROOK) {
+                return "R";
+            }
+            else if (type == ChessPiece.PieceType.PAWN) {
+                return "P";
+            }
+        }
+        return null;
     }
 
     /**
