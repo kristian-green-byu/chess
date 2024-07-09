@@ -208,6 +208,7 @@ public class ChessGame {
                 throw new InvalidMoveException();
             }
             chessBoard.addPiece(startPosition, null);
+            //If promotion piece is given in the move, make a new chess piece of that type rather than a pawn
             if(move.getPromotionPiece()==null){
                 chessBoard.addPiece(move.getEndPosition(), movePiece);
             }
