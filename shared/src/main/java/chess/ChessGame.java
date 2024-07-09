@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -69,7 +70,9 @@ public class ChessGame {
         ChessPiece piece = chessBoard.getPiece(startPosition);
         if(piece != null) {
             Collection<ChessMove> validMoves = piece.pieceMoves(chessBoard, startPosition);
-            for(ChessMove move : validMoves) {
+            Iterator<ChessMove> iterator = validMoves.iterator();
+            while(iterator.hasNext()) {
+                ChessMove move = iterator.next();
                 //remove moves that put their own king in check
                 ChessPiece wantedPiece = chessBoard.getPiece(move.getStartPosition());
                 ChessPiece replacePiece = chessBoard.getPiece(move.getEndPosition());
@@ -77,10 +80,11 @@ public class ChessGame {
                 chessBoard.addPiece(move.getEndPosition(), wantedPiece);
                 updateIsInCheck();
                 if(wantedPiece.getTeamColor() == TeamColor.WHITE && whiteCheck || wantedPiece.getTeamColor() == TeamColor.BLACK && blackCheck){
-                    validMoves.remove(move);
+                    iterator.remove();
                 }
                 chessBoard.addPiece(move.getEndPosition(),replacePiece);
                 chessBoard.addPiece(move.getStartPosition(), wantedPiece);
+                updateIsInCheck();
             }
             return validMoves;
         }
@@ -161,7 +165,7 @@ public class ChessGame {
                 ChessPiece piece = chessBoard.getPiece(position);
                 if(piece!=null){
                     Collection<ChessMove> moves = validMoves(position);
-                    if(moves!=null){
+                    if(!moves.isEmpty()){
                         if(piece.getTeamColor()==TeamColor.WHITE){
                             whiteStalemate = false;
                         }
