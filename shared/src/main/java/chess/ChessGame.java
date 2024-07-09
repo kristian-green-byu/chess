@@ -157,6 +157,9 @@ public class ChessGame {
         }
     }
     public void checkStalemate(){
+        if(whiteCheckmate || blackCheckmate) {
+            return;
+        }
         whiteStalemate = true;
         blackStalemate = true;
         for(int i = 8; i >= 1; i--) {
