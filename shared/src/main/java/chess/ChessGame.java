@@ -203,12 +203,20 @@ public class ChessGame {
             throw new InvalidMoveException();
         }
         else{
-            ChessPiece wantedPiece = chessBoard.getPiece(startPosition);
+            ChessPiece movePiece = chessBoard.getPiece(startPosition);
+            if(movePiece.getTeamColor() != teamTurn) {
+                throw new InvalidMoveException();
+            }
             chessBoard.addPiece(startPosition, null);
-            chessBoard.addPiece(move.getEndPosition(), wantedPiece);
+            if(move.getPromotionPiece()==null){
+                chessBoard.addPiece(move.getEndPosition(), movePiece);
+            }
+            else{
+                chessBoard.addPiece(move.getEndPosition(), new ChessPiece(movePiece.getTeamColor(), move.getPromotionPiece()));
+            }
 
             //set next turn
-            if(wantedPiece.getTeamColor() == TeamColor.WHITE) {
+            if(movePiece.getTeamColor() == TeamColor.WHITE) {
                 teamTurn = TeamColor.BLACK;
             }
             else{
