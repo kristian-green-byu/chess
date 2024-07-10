@@ -194,14 +194,18 @@ public class ChessGame {
             ChessPiece leftRook = chessBoard.getPiece(new ChessPosition(row,1));
             //add left castle move if possible
             if(leftRook != null && leftRook.getPieceType()== ChessPiece.PieceType.ROOK && leftRook.getTeamColor()==teamColor){
-                ChessMove leftCastleKing = new ChessMove(new ChessPosition(row,5), new ChessPosition(row,3), null);
-                moves.add(leftCastleKing);
+                if(chessBoard.getPiece(new ChessPosition(row, 2))==null && chessBoard.getPiece(new ChessPosition(row, 3))==null && chessBoard.getPiece(new ChessPosition(row, 4))==null){
+                    ChessMove leftCastleKing = new ChessMove(new ChessPosition(row,5), new ChessPosition(row,3), null);
+                    moves.add(leftCastleKing);
+                }
             }
             //add right castle move if possible
             ChessPiece rightRook = chessBoard.getPiece(new ChessPosition(row,8));
             if(rightRook != null && rightRook.getPieceType()== ChessPiece.PieceType.ROOK && rightRook.getTeamColor()==teamColor){
-                ChessMove rightCastleKing = new ChessMove(new ChessPosition(row,5), new ChessPosition(row,7), null);
-                moves.add(rightCastleKing);
+                if(chessBoard.getPiece(new ChessPosition(row, 6))==null && chessBoard.getPiece(new ChessPosition(row, 7))==null){
+                    ChessMove rightCastleKing = new ChessMove(new ChessPosition(row,5), new ChessPosition(row,7), null);
+                    moves.add(rightCastleKing);
+                }
             }
         }
     }
