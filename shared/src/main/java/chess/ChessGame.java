@@ -18,6 +18,10 @@ public class ChessGame {
     private boolean blackCheckmate;
     private boolean whiteStalemate;
     private boolean blackStalemate;
+    private boolean lwCastlePossible;
+    private boolean rwCastlePossible;
+    private boolean lbCastlePossible;
+    private boolean rbCastlePossible;
 
     public ChessGame() {
         //Initializes all chess parameters to their defaults.
@@ -32,6 +36,10 @@ public class ChessGame {
         this.blackCheckmate = false;
         this.whiteStalemate = false;
         this.blackStalemate = false;
+        this.lwCastlePossible = true;
+        this.rwCastlePossible = true;
+        this.lbCastlePossible = true;
+        this.rbCastlePossible = true;
     }
 
     /**
@@ -218,28 +226,32 @@ public class ChessGame {
         if(king != null && king.getPieceType()== ChessPiece.PieceType.KING && king.getTeamColor()==teamColor){
             ChessPiece leftRook = chessBoard.getPiece(new ChessPosition(row,1));
             //add left castle move if possible
-            if(leftRook != null && leftRook.getPieceType()== ChessPiece.PieceType.ROOK && leftRook.getTeamColor()==teamColor){
-                if(chessBoard.getPiece(new ChessPosition(row, 2))==null && chessBoard.getPiece(new ChessPosition(row, 3))==null && chessBoard.getPiece(new ChessPosition(row, 4))==null){
-                    for(int i = 3; i < 5; i++){
-                        if(leftCastleBlocked(teamColor, row, i)){
-                            return;
+            if(teamColor == TeamColor.WHITE && lwCastlePossible || teamColor == TeamColor.BLACK && lbCastlePossible) {
+                if (leftRook != null && leftRook.getPieceType() == ChessPiece.PieceType.ROOK && leftRook.getTeamColor() == teamColor) {
+                    if (chessBoard.getPiece(new ChessPosition(row, 2)) == null && chessBoard.getPiece(new ChessPosition(row, 3)) == null && chessBoard.getPiece(new ChessPosition(row, 4)) == null) {
+                        for (int i = 3; i < 5; i++) {
+                            if (leftCastleBlocked(teamColor, row, i)) {
+                                return;
+                            }
                         }
+                        ChessMove leftCastleKing = new ChessMove(new ChessPosition(row, 5), new ChessPosition(row, 3), null);
+                        moves.add(leftCastleKing);
                     }
-                    ChessMove leftCastleKing = new ChessMove(new ChessPosition(row,5), new ChessPosition(row,3), null);
-                    moves.add(leftCastleKing);
                 }
             }
             //add right castle move if possible
-            ChessPiece rightRook = chessBoard.getPiece(new ChessPosition(row,8));
-            if(rightRook != null && rightRook.getPieceType()== ChessPiece.PieceType.ROOK && rightRook.getTeamColor()==teamColor){
-                if(chessBoard.getPiece(new ChessPosition(row, 6))==null && chessBoard.getPiece(new ChessPosition(row, 7))==null){
-                    for(int i = 7; i>5; i--){
-                        if(rightCastleBlocked(teamColor, row, i)){
-                            return;
+            if(teamColor == TeamColor.WHITE && rwCastlePossible || teamColor == TeamColor.BLACK && rbCastlePossible){
+                ChessPiece rightRook = chessBoard.getPiece(new ChessPosition(row,8));
+                if(rightRook != null && rightRook.getPieceType()== ChessPiece.PieceType.ROOK && rightRook.getTeamColor()==teamColor){
+                    if(chessBoard.getPiece(new ChessPosition(row, 6))==null && chessBoard.getPiece(new ChessPosition(row, 7))==null){
+                        for(int i = 7; i>5; i--){
+                            if(rightCastleBlocked(teamColor, row, i)){
+                                return;
+                            }
                         }
+                        ChessMove rightCastleKing = new ChessMove(new ChessPosition(row,5), new ChessPosition(row,7), null);
+                        moves.add(rightCastleKing);
                     }
-                    ChessMove rightCastleKing = new ChessMove(new ChessPosition(row,5), new ChessPosition(row,7), null);
-                    moves.add(rightCastleKing);
                 }
             }
         }
@@ -307,7 +319,6 @@ public class ChessGame {
             else{
                 chessBoard.addPiece(move.getEndPosition(), new ChessPiece(movePiece.getTeamColor(), move.getPromotionPiece()));
             }
-
             //set next turn
             if(movePiece.getTeamColor() == TeamColor.WHITE) {
                 teamTurn = TeamColor.BLACK;
@@ -315,7 +326,30 @@ public class ChessGame {
             else{
                 teamTurn = TeamColor.WHITE;
             }
+            setCastleFlags(startPosition);
             updateFields();
+        }
+    }
+    public void setCastleFlags(ChessPosition startPosition){
+        if(startPosition.equals(new ChessPosition(1, 5))){
+            rwCastlePossible = false;
+            lwCastlePossible = false;
+        }
+        else if(startPosition.equals(new ChessPosition(8, 5))){
+            rbCastlePossible = false;
+            rwCastlePossible = false;
+        }
+        else if(startPosition.equals(new ChessPosition(1,8))){
+            rwCastlePossible = false;
+        }
+        else if(startPosition.equals(new ChessPosition(1,1))){
+            lwCastlePossible = false;
+        }
+        else if(startPosition.equals(new ChessPosition(8,1))){
+            lbCastlePossible = false;
+        }
+        else if(startPosition.equals(new ChessPosition(8,8))){
+            rbCastlePossible = false;
         }
     }
 
@@ -364,7 +398,12 @@ public class ChessGame {
             return blackStalemate;
         }
     }
-
+    public void resetCastleFlags(){
+        lwCastlePossible = true;
+        rwCastlePossible = true;
+        lbCastlePossible = true;
+        rbCastlePossible = true;
+    }
     /**
      * Sets this game's chessboard with a given board
      *
@@ -373,6 +412,7 @@ public class ChessGame {
     public void setBoard(ChessBoard board) {
         chessBoard = board;
         updateFields();
+        resetCastleFlags();
     }
 
     /**
