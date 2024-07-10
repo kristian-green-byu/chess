@@ -70,25 +70,30 @@ public class ChessGame {
         ChessPiece piece = chessBoard.getPiece(startPosition);
         if(piece != null) {
             Collection<ChessMove> validMoves = piece.pieceMoves(chessBoard, startPosition);
-            Iterator<ChessMove> iterator = validMoves.iterator();
-            while(iterator.hasNext()) {
-                ChessMove move = iterator.next();
-                //remove moves that put their own king in check
-                ChessPiece wantedPiece = chessBoard.getPiece(move.getStartPosition());
-                ChessPiece replacePiece = chessBoard.getPiece(move.getEndPosition());
-                chessBoard.addPiece(move.getStartPosition(), null);
-                chessBoard.addPiece(move.getEndPosition(), wantedPiece);
-                updateIsInCheck();
-                if(wantedPiece.getTeamColor() == TeamColor.WHITE && whiteCheck || wantedPiece.getTeamColor() == TeamColor.BLACK && blackCheck){
-                    iterator.remove();
-                }
-                chessBoard.addPiece(move.getEndPosition(),replacePiece);
-                chessBoard.addPiece(move.getStartPosition(), wantedPiece);
-                updateIsInCheck();
-            }
+            handleCastling(validMoves);
+            removeCheckMoves(validMoves);
             return validMoves;
         }
         return null;
+    }
+
+    public void removeCheckMoves(Collection<ChessMove> validMoves) {
+        //remove moves that put their own king in check
+        Iterator<ChessMove> iterator = validMoves.iterator();
+        while(iterator.hasNext()) {
+            ChessMove move = iterator.next();
+            ChessPiece wantedPiece = chessBoard.getPiece(move.getStartPosition());
+            ChessPiece replacePiece = chessBoard.getPiece(move.getEndPosition());
+            chessBoard.addPiece(move.getStartPosition(), null);
+            chessBoard.addPiece(move.getEndPosition(), wantedPiece);
+            updateIsInCheck();
+            if(wantedPiece.getTeamColor() == TeamColor.WHITE && whiteCheck || wantedPiece.getTeamColor() == TeamColor.BLACK && blackCheck){
+                iterator.remove();
+            }
+            chessBoard.addPiece(move.getEndPosition(),replacePiece);
+            chessBoard.addPiece(move.getStartPosition(), wantedPiece);
+            updateIsInCheck();
+        }
     }
 
     public void updateIsInCheck() {
@@ -180,6 +185,27 @@ public class ChessGame {
             }
         }
     }
+    /**
+     *
+     */
+    public void handleCastling(Collection<ChessMove> moves){
+        //check if white king/rooks have moved
+        ChessPiece whiteKing = chessBoard.getPiece(new ChessPosition(1,5));
+        if(whiteKing != null && whiteKing.getPieceType()== ChessPiece.PieceType.KING && whiteKing.getTeamColor()==TeamColor.WHITE){
+            ChessPiece leftRookWhite = chessBoard.getPiece(new ChessPosition(1,1));
+            //add left castle move if possible
+            if(leftRookWhite != null && leftRookWhite.getPieceType()== ChessPiece.PieceType.ROOK && leftRookWhite.getTeamColor()==TeamColor.WHITE){
+                ChessMove leftCastleWhiteKing = new ChessMove(new ChessPosition(1,5), new ChessPosition(1,3), null);
+                moves.add(leftCastleWhiteKing);
+            }
+            //add right castle move if possible
+            ChessPiece rightRookWhite = chessBoard.getPiece(new ChessPosition(1,8));
+            if(rightRookWhite != null && rightRookWhite.getPieceType()== ChessPiece.PieceType.ROOK && rightRookWhite.getTeamColor()==TeamColor.WHITE){
+                ChessMove rightCastleWhiteKing = new ChessMove(new ChessPosition(1,5), new ChessPosition(1,7), null);
+                moves.add(rightCastleWhiteKing);
+            }
+        }
+    }
 
     public void updateFields(){
         updateIsInCheck();
@@ -206,6 +232,24 @@ public class ChessGame {
             ChessPiece movePiece = chessBoard.getPiece(startPosition);
             if(movePiece.getTeamColor() != teamTurn) {
                 throw new InvalidMoveException();
+            }
+            //check if move is castling to add rook move in addition to king move
+
+            //check white castle
+            if(chessBoard.getPiece(move.getStartPosition()).getPieceType() == ChessPiece.PieceType.KING && chessBoard.getPiece(move.getStartPosition()).getTeamColor()==TeamColor.WHITE){
+                //if true add left rook move
+                if(move.getStartPosition().equals(new ChessPosition(1, 5)) && move.getEndPosition().equals(new ChessPosition(1, 3))) {
+                    chessBoard.addPiece(new ChessPosition(1,4), new ChessPiece(TeamColor.WHITE, ChessPiece.PieceType.ROOK));
+                    chessBoard.addPiece(new ChessPosition(1,1), null);
+                }
+                //if true add right rook move
+                else if(move.getStartPosition().equals(new ChessPosition(1, 5)) && move.getEndPosition().equals(new ChessPosition(1, 7))){
+                    chessBoard.addPiece(new ChessPosition(1,6), new ChessPiece(TeamColor.WHITE, ChessPiece.PieceType.ROOK));
+                    chessBoard.addPiece(new ChessPosition(1,8), null);
+                }
+            }
+            //check black castle
+            if(chessBoard.getPiece(move.getStartPosition()).getPieceType() == ChessPiece.PieceType.KING && chessBoard.getPiece(move.getStartPosition()).getTeamColor()==TeamColor.BLACK){
             }
             chessBoard.addPiece(startPosition, null);
             //If promotion piece is given in the move, make a new chess piece of that type rather than a pawn
