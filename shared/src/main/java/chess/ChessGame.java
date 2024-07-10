@@ -184,9 +184,34 @@ public class ChessGame {
             }
         }
     }
-    /**
-     *
-     */
+    public boolean leftCastleBlocked(TeamColor teamColor, int row, int col){
+        chessBoard.addPiece(new ChessPosition(row,col), new ChessPiece(teamColor, ChessPiece.PieceType.KING));
+        chessBoard.addPiece(new ChessPosition(row, 5), null);
+        updateIsInCheck();
+        if(teamColor == TeamColor.WHITE && whiteCheck || teamColor == TeamColor.BLACK && blackCheck) {
+            chessBoard.addPiece(new ChessPosition(row ,3), null);
+            chessBoard.addPiece(new ChessPosition(row ,4), null);
+            chessBoard.addPiece(new ChessPosition(row, 5), new ChessPiece(teamColor, ChessPiece.PieceType.KING));
+            return true;
+        }
+        chessBoard.addPiece(new ChessPosition(row,col), null);
+        chessBoard.addPiece(new ChessPosition(row, 5), new ChessPiece(teamColor, ChessPiece.PieceType.KING));
+        return false;
+    }
+    public boolean rightCastleBlocked(TeamColor teamColor, int row, int col){
+        chessBoard.addPiece(new ChessPosition(row,col), new ChessPiece(teamColor, ChessPiece.PieceType.KING));
+        chessBoard.addPiece(new ChessPosition(row, 5), null);
+        updateIsInCheck();
+        if(teamColor == TeamColor.WHITE && whiteCheck || teamColor == TeamColor.BLACK && blackCheck) {
+            chessBoard.addPiece(new ChessPosition(row ,6), null);
+            chessBoard.addPiece(new ChessPosition(row ,7), null);
+            chessBoard.addPiece(new ChessPosition(row, 5), new ChessPiece(teamColor, ChessPiece.PieceType.KING));
+            return true;
+        }
+        chessBoard.addPiece(new ChessPosition(row,col), null);
+        chessBoard.addPiece(new ChessPosition(row, 5), new ChessPiece(teamColor, ChessPiece.PieceType.KING));
+        return false;
+    }
     public void castlingHelper(int row, TeamColor teamColor, Collection<ChessMove> moves) {
         //check if king/rooks have moved
         ChessPiece king = chessBoard.getPiece(new ChessPosition(row,5));
@@ -195,6 +220,11 @@ public class ChessGame {
             //add left castle move if possible
             if(leftRook != null && leftRook.getPieceType()== ChessPiece.PieceType.ROOK && leftRook.getTeamColor()==teamColor){
                 if(chessBoard.getPiece(new ChessPosition(row, 2))==null && chessBoard.getPiece(new ChessPosition(row, 3))==null && chessBoard.getPiece(new ChessPosition(row, 4))==null){
+                    for(int i = 3; i < 5; i++){
+                        if(leftCastleBlocked(teamColor, row, i)){
+                            return;
+                        }
+                    }
                     ChessMove leftCastleKing = new ChessMove(new ChessPosition(row,5), new ChessPosition(row,3), null);
                     moves.add(leftCastleKing);
                 }
@@ -203,6 +233,11 @@ public class ChessGame {
             ChessPiece rightRook = chessBoard.getPiece(new ChessPosition(row,8));
             if(rightRook != null && rightRook.getPieceType()== ChessPiece.PieceType.ROOK && rightRook.getTeamColor()==teamColor){
                 if(chessBoard.getPiece(new ChessPosition(row, 6))==null && chessBoard.getPiece(new ChessPosition(row, 7))==null){
+                    for(int i = 7; i>5; i--){
+                        if(rightCastleBlocked(teamColor, row, i)){
+                            return;
+                        }
+                    }
                     ChessMove rightCastleKing = new ChessMove(new ChessPosition(row,5), new ChessPosition(row,7), null);
                     moves.add(rightCastleKing);
                 }
