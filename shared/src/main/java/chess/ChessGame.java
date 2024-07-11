@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -22,6 +23,7 @@ public class ChessGame {
     private boolean rwCastlePossible;
     private boolean lbCastlePossible;
     private boolean rbCastlePossible;
+    private Collection<ChessPosition> doubleMovePawns;
 
     public ChessGame() {
         //Initializes all chess parameters to their defaults.
@@ -40,6 +42,7 @@ public class ChessGame {
         this.rwCastlePossible = true;
         this.lbCastlePossible = true;
         this.rbCastlePossible = true;
+        this.doubleMovePawns = new ArrayList<>();
     }
 
     /**
@@ -65,7 +68,20 @@ public class ChessGame {
         WHITE,
         BLACK
     }
-
+    public void handleEnPassant(Collection<ChessMove> validMoves, ChessPiece piece, ChessPosition startPosition, int currentRow, int finalRow, TeamColor team){
+        if(piece.getPieceType()== ChessPiece.PieceType.PAWN && piece.getTeamColor()==team && startPosition.getRow()==currentRow){
+            if(startPosition.getColumn()-1>0){
+                if(doubleMovePawns.contains(new ChessPosition(currentRow, startPosition.getColumn()-1))){
+                    validMoves.add(new ChessMove(startPosition, new ChessPosition(finalRow, startPosition.getColumn()-1), null));
+                }
+            }
+            if(startPosition.getColumn()+1<9){
+                if(doubleMovePawns.contains(new ChessPosition(5, startPosition.getColumn()+1))){
+                    validMoves.add(new ChessMove(startPosition, new ChessPosition(finalRow, startPosition.getColumn()+1), null));
+                }
+            }
+        }
+    }
     /**
      * Gets a valid moves for a piece at the given location
      *
@@ -78,6 +94,8 @@ public class ChessGame {
         if(piece != null) {
             Collection<ChessMove> validMoves = piece.pieceMoves(chessBoard, startPosition);
             handleCastling(validMoves);
+            handleEnPassant(validMoves, piece, startPosition, startPosition.getRow(), startPosition.getRow()+1, TeamColor.WHITE);
+            handleEnPassant(validMoves, piece, startPosition, startPosition.getRow(), startPosition.getRow()-1, TeamColor.BLACK);
             removeCheckMoves(validMoves);
             return validMoves;
         }
@@ -311,6 +329,7 @@ public class ChessGame {
             }
             //check if move is castling to add rook move in addition to king move
             rookCastleMove(move);
+            enPassantRemovePawn(movePiece, startPosition, move);
             chessBoard.addPiece(startPosition, null);
             //If promotion piece is given in the move, make a new chess piece of that type rather than a pawn
             if(move.getPromotionPiece()==null){
@@ -327,7 +346,25 @@ public class ChessGame {
                 teamTurn = TeamColor.WHITE;
             }
             setCastleFlags(startPosition);
+            updateDoubleMovePawns(move, startPosition);
             updateFields();
+        }
+    }
+    public void enPassantRemovePawn(ChessPiece movePiece, ChessPosition startPosition, ChessMove move){
+        //checks if an enPassant move has occurred. If so, remove the captured pawn from the board.
+        if(movePiece.getPieceType() == ChessPiece.PieceType.PAWN && doubleMovePawns.contains(new ChessPosition(startPosition.getRow(),move.getEndPosition().getColumn()))){
+            chessBoard.addPiece(new ChessPosition(startPosition.getRow(),move.getEndPosition().getColumn()),null);
+            doubleMovePawns.remove(new ChessPosition(startPosition.getRow(),move.getEndPosition().getColumn()));
+        }
+    }
+    public void updateDoubleMovePawns(ChessMove move, ChessPosition startPosition){
+        for(int i =1; i<9; i++){
+            if(chessBoard.getPiece(move.getEndPosition()).getPieceType()== ChessPiece.PieceType.PAWN && (startPosition.equals(new ChessPosition(2, i)) && move.getEndPosition().equals(new ChessPosition(4, i)) || startPosition.equals(new ChessPosition(7, i)) && move.getEndPosition().equals(new ChessPosition(5, i)))){
+                doubleMovePawns.add(move.getEndPosition());
+            }
+            else if(chessBoard.getPiece(move.getEndPosition()).getPieceType()== ChessPiece.PieceType.PAWN && startPosition.equals(new ChessPosition(4, i)) || startPosition.equals(new ChessPosition(5, i))){
+                doubleMovePawns.remove(startPosition);
+            }
         }
     }
     public void setCastleFlags(ChessPosition startPosition){
@@ -413,6 +450,7 @@ public class ChessGame {
         chessBoard = board;
         updateFields();
         resetCastleFlags();
+        this.doubleMovePawns = new ArrayList<>();
     }
 
     /**
