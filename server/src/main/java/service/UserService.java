@@ -10,4 +10,7 @@ public class UserService {
         return null;
     }
     public void logout(UserData user){}
+    public void clearApplication(){
+
+    }
 }
