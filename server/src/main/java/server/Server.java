@@ -44,6 +44,7 @@ public class Server {
     private Object register(Request req, Response res) throws DataAccessException{
         RegisterRequest registerRequest = new Gson().fromJson(req.body(), RegisterRequest.class);
         RegisterResponse registerResponse = userService.register(registerRequest);
+        res.status(200);
         return new Gson().toJson(registerResponse);
     }
     private Object clearAll(Request req, Response res) throws DataAccessException {
