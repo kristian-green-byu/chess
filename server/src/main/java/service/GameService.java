@@ -1,7 +1,7 @@
 package service;
 
-public class GameService {
-    public void clearApplication(){
 
+public class GameService {
+    public void clearGames(){
     }
 }

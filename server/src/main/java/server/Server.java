@@ -1,5 +1,8 @@
 package server;
 
+import com.google.gson.Gson;
+import dataaccess.DataAccessException;
+import requests.RegisterRequest;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
@@ -21,6 +24,7 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
+        Spark.post("/user", this::register);
         Spark.delete("/db", this::clearAll);
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
@@ -34,11 +38,14 @@ public class Server {
         Spark.awaitStop();
     }
 
-    //handlers
-    private Object clearAll(Request req, Response res) {
-        authService.clearApplication();
-        gameService.clearApplication();
-        userService.clearApplication();
+    private Object register(Request req, Response res) throws DataAccessException{
+        RegisterRequest registerRequest = new Gson().fromJson(req.body(), RegisterRequest.class);
+        userService.register(registerRequest);
+    }
+    private Object clearAll(Request req, Response res) throws DataAccessException {
+        authService.clearAuth();
+        gameService.clearGames();
+        userService.clearUsers();
         res.status(200);
         return "";
     }
