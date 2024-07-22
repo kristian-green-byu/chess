@@ -2,10 +2,13 @@ package service;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
+import model.AuthData;
 import model.UserData;
 import requests.LoginRequest;
+import requests.LogoutRequest;
 import requests.RegisterRequest;
 import responses.LoginResponse;
+import responses.LogoutResponse;
 import responses.RegisterResponse;
 
 public class UserService {
@@ -65,7 +68,18 @@ public class UserService {
             throw new DataAccessException("username not registered");
         }
     }
-    public void logout(UserData user){}
+    public LogoutResponse logout(LogoutRequest logoutRequest) throws DataAccessException {
+        AuthData authData = authDAO.getAuthData(logoutRequest.authToken());
+        if(authData == null){
+            throw new DataAccessException("user not logged in");
+        }
+        else{
+            authDAO.deleteAuthData(authData);
+            return new LogoutResponse();
+        }
+    }
     public void clearUsers(){
+        authDAO.clearAuthData();
+        userDAO.clearUserData();
     }
 }

@@ -3,8 +3,10 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.*;
 import requests.LoginRequest;
+import requests.LogoutRequest;
 import requests.RegisterRequest;
 import responses.LoginResponse;
+import responses.LogoutResponse;
 import responses.RegisterResponse;
 import service.AuthService;
 import service.GameService;
@@ -32,6 +34,7 @@ public class Server {
         Spark.post("/user", this::register);
         Spark.delete("/db", this::clearAll);
         Spark.post("/session", this::login);
+        Spark.delete("/session", this::logout);
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
 
@@ -42,6 +45,12 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+
+    private Object logout(Request req, Response res) throws DataAccessException{
+        LogoutRequest logoutRequest = new Gson().fromJson(req.headers("Authorization"), LogoutRequest.class);
+        LogoutResponse LogoutResponse = userService.logout(logoutRequest);
+        return new Gson().toJson(LogoutResponse);
     }
 
     private Object login(Request req, Response res) throws DataAccessException {

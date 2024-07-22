@@ -20,4 +20,8 @@ public class MemoryUserDAO implements UserDAO{
     public void createUser(UserData user){
         users.put(nextID++, user);
     }
+
+    public void clearUserData(){
+        users.clear();
+    }
 }
