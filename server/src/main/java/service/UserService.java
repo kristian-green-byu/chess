@@ -11,10 +11,11 @@ import responses.LoginResponse;
 import responses.LogoutResponse;
 import responses.RegisterResponse;
 
-public class UserService {
+public class UserService{
 
-    private final dataaccess.AuthDAO authDAO;
     private final dataaccess.UserDAO userDAO;
+    private final AuthDAO authDAO;
+
     public UserService(AuthDAO authDAO, UserDAO userDAO) {
         this.authDAO = authDAO;
         this.userDAO = userDAO;
