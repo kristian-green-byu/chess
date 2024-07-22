@@ -2,14 +2,8 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.*;
-import requests.CreateGameRequest;
-import requests.LoginRequest;
-import requests.LogoutRequest;
-import requests.RegisterRequest;
-import responses.CreateGameResponse;
-import responses.LoginResponse;
-import responses.LogoutResponse;
-import responses.RegisterResponse;
+import requests.*;
+import responses.*;
 import service.GameService;
 import service.UserService;
 import spark.*;
@@ -50,7 +44,9 @@ public class Server {
         Spark.awaitStop();
     }
 
-    private Object joinGame(Request req, Response res) {
+    private Object joinGame(Request req, Response res) throws DataAccessException {
+        JoinGameRequest joinGameRequest = new Gson().fromJson(req.body(), JoinGameRequest.class);
+        JoinGameResponse joinGameResponse = gameService.joinGame(joinGameRequest);
         return null;
     }
 

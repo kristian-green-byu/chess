@@ -1,12 +1,16 @@
 package service;
 
 
+import chess.ChessGame;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import model.AuthData;
+import model.GameData;
 import requests.CreateGameRequest;
+import requests.JoinGameRequest;
 import responses.CreateGameResponse;
+import responses.JoinGameResponse;
 
 public class GameService {
 
@@ -31,6 +35,30 @@ public class GameService {
         }
         int gameID = gameDAO.createGame(createGameRequest.gameName());
         return new CreateGameResponse(gameID);
+    }
+
+    public JoinGameResponse joinGame(JoinGameRequest joinGameRequest) throws DataAccessException {
+        AuthData authData = authDAO.getAuthData(joinGameRequest.authToken());
+        if(authData==null){
+            throw new DataAccessException("unauthorized");
+        }
+        GameData gameData = gameDAO.getGame(joinGameRequest.gameID());
+        if(gameData==null){
+            throw new DataAccessException("unauthorized");
+        }
+        if(joinGameRequest.playerColor() == ChessGame.TeamColor.WHITE){
+           if(gameData.whiteUsername()!= null){
+               throw new DataAccessException("unauthorized");
+           }
+
+        }
+        else {
+           if(gameData.blackUsername()!= null){
+               throw new DataAccessException("unauthorized");
+           }
+        }
+        gameDAO.updateGame(authData.username(), joinGameRequest.playerColor(), gameData);
+        return new JoinGameResponse();
     }
 
     public void clearGames(){
