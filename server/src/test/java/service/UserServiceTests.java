@@ -5,6 +5,7 @@ import requests.LoginRequest;
 import requests.LogoutRequest;
 import requests.RegisterRequest;
 import responses.LoginResponse;
+import responses.LogoutResponse;
 import responses.RegisterResponse;
 
 public class UserServiceTests {
@@ -20,6 +21,7 @@ public class UserServiceTests {
         RegisterResponse expectedResponse = new RegisterResponse("username", authToken);
         assert observedResponse.equals(expectedResponse);
     }
+
     @Test
     public void registerWithNullField(){
         RegisterRequest registerRequest = new RegisterRequest("username", null, "test@email.com");
@@ -29,6 +31,7 @@ public class UserServiceTests {
         } catch (DataAccessException ignored) {}
         assert true;
     }
+
     @Test
     public void registerAlreadyRegistered() throws DataAccessException {
         RegisterRequest registerRequest1 = new RegisterRequest("username", "password", "test@email.com");
@@ -54,6 +57,7 @@ public class UserServiceTests {
         LoginResponse expectedResponse = new LoginResponse("bob", authToken2);
         assert observedResponse.equals(expectedResponse);
     }
+
     @Test
     public void loginNotRegistered(){
         LoginRequest loginRequest = new LoginRequest("john", "cena");
@@ -63,6 +67,7 @@ public class UserServiceTests {
         } catch (DataAccessException ignored) {}
         assert true;
     }
+
     @Test
     public void loginWithNullField() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("username", "password", "test@email.com");
@@ -70,6 +75,26 @@ public class UserServiceTests {
         LoginRequest loginRequest = new LoginRequest(null, "password");
         try{
             userService.login(loginRequest);
+            assert false;
+        } catch (DataAccessException ignored) {}
+        assert true;
+    }
+
+    @Test
+    public void logoutSuccess() throws DataAccessException {
+        RegisterRequest registerRequest = new RegisterRequest("john", "doe", "jd@email.com");
+        RegisterResponse registerResponse = userService.register(registerRequest);
+        String authToken = registerResponse.authToken();
+        LogoutRequest logoutRequest = new LogoutRequest(authToken);
+        LogoutResponse logoutResponse = userService.logout(logoutRequest);
+        assert logoutResponse != null && authDAO.getAuthData(authToken)==null;
+    }
+
+    @Test
+    public void logoutNotLoggedIn() throws DataAccessException {
+        LogoutRequest logoutRequest = new LogoutRequest("authToken");
+        try {
+            userService.logout(logoutRequest);
             assert false;
         } catch (DataAccessException ignored) {}
         assert true;
