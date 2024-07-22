@@ -20,6 +20,7 @@ public class UserService{
         this.authDAO = authDAO;
         this.userDAO = userDAO;
     }
+
     public RegisterResponse register(RegisterRequest registerRequest) throws DataAccessException {
         if(registerRequest == null){
             throw new DataAccessException("register request is null");
@@ -45,6 +46,7 @@ public class UserService{
             return new RegisterResponse(username, authToken);
         }
     }
+
     public LoginResponse login(LoginRequest loginRequest) throws DataAccessException {
         if(loginRequest == null){
             throw new DataAccessException("login request is null");
@@ -69,6 +71,7 @@ public class UserService{
             throw new DataAccessException("username not registered");
         }
     }
+
     public LogoutResponse logout(LogoutRequest logoutRequest) throws DataAccessException {
         AuthData authData = authDAO.getAuthData(logoutRequest.authToken());
         if(authData == null){
@@ -79,6 +82,7 @@ public class UserService{
             return new LogoutResponse();
         }
     }
+
     public void clearUsers(){
         authDAO.clearAuthData();
         userDAO.clearUserData();

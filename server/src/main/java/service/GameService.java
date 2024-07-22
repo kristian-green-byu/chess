@@ -22,13 +22,15 @@ public class GameService {
         if(createGameRequest.gameName()==null){
             throw new DataAccessException("unauthorized");
         }
+        else if(authDAO.getAuthData(createGameRequest.authToken())==null){
+            throw new DataAccessException("unauthorized");
+        }
         AuthData authData = authDAO.getAuthData(createGameRequest.authToken());
         if(authData==null){
             throw new DataAccessException("unauthorized");
         }
-        gameDAO.createGame(createGameRequest.gameName());
-
-        return null;
+        int gameID = gameDAO.createGame(createGameRequest.gameName());
+        return new CreateGameResponse(gameID);
     }
 
     public void clearGames(){
