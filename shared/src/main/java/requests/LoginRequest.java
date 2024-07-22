@@ -1,6 +1,6 @@
 package requests;
 
-record LoginRequest(
+public record LoginRequest(
         String username,
         String password){
 }

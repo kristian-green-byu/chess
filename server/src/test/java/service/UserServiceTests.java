@@ -1,15 +1,13 @@
 package service;
-import dataaccess.AuthDAO;
-import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDAO;
-import org.junit.jupiter.api.BeforeAll;
+import dataaccess.*;
 import org.junit.jupiter.api.Test;
 import requests.RegisterRequest;
 import responses.RegisterResponse;
 
 public class UserServiceTests {
     AuthDAO authDAO = new MemoryAuthDAO();
-    UserService userService = new UserService(authDAO);
+    UserDAO userDAO = new MemoryUserDAO();
+    UserService userService = new UserService(authDAO, userDAO);
 
     @Test
     public void registerSuccess() throws DataAccessException {
@@ -20,11 +18,23 @@ public class UserServiceTests {
         assert observedResponse.equals(expectedResponse);
     }
     @Test
-    public void registerFailure() throws DataAccessException {
+    public void registerWithNullField(){
         RegisterRequest registerRequest = new RegisterRequest("username", null, "test@email.com");
         try{
             userService.register(registerRequest);
-        } catch (DataAccessException e) {
-        assert true;}
+            assert false;
+        } catch (DataAccessException ignored) {}
+        assert true;
+    }
+    @Test
+    public void registerAlreadyRegistered() throws DataAccessException {
+        RegisterRequest registerRequest1 = new RegisterRequest("username", "password", "test@email.com");
+        userService.register(registerRequest1);
+        RegisterRequest registerRequest2 = new RegisterRequest("username", "password2", "test2@email.com");
+        try{
+            userService.register(registerRequest2);
+            assert false;
+        } catch (DataAccessException ignored) {}
+        assert true;
     }
 }
