@@ -13,7 +13,7 @@ import responses.RegisterResponse;
 
 public class UserService{
 
-    private final dataaccess.UserDAO userDAO;
+    private final UserDAO userDAO;
     private final AuthDAO authDAO;
 
     public UserService(AuthDAO authDAO, UserDAO userDAO) {

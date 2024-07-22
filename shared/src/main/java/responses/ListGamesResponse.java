@@ -1,6 +1,8 @@
 package responses;
+import model.GameData;
+import java.util.Collection;
 
 public record ListGamesResponse(
-        //placeholder needs list of id, white username, blackusername, gamename
+        Collection<GameData> games
 ) {
 }

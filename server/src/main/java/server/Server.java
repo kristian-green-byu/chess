@@ -2,26 +2,26 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.*;
+import requests.CreateGameRequest;
 import requests.LoginRequest;
 import requests.LogoutRequest;
 import requests.RegisterRequest;
+import responses.CreateGameResponse;
 import responses.LoginResponse;
 import responses.LogoutResponse;
 import responses.RegisterResponse;
-import service.AuthService;
 import service.GameService;
 import service.UserService;
 import spark.*;
 
 public class Server {
-    private final AuthService authService;
     private final GameService gameService;
     private final UserService userService;
     public Server() {
         AuthDAO authDAO = new MemoryAuthDAO();
         UserDAO userDAO = new MemoryUserDAO();
-        authService = new AuthService();
-        gameService = new GameService();
+        GameDAO gameDAO = new MemoryGameDAO();
+        gameService = new GameService(gameDAO, authDAO);
         userService = new UserService(authDAO, userDAO);
     }
 
@@ -35,6 +35,9 @@ public class Server {
         Spark.delete("/db", this::clearAll);
         Spark.post("/session", this::login);
         Spark.delete("/session", this::logout);
+        Spark.get("/game", this::listGames);
+        Spark.post("/game", this::createGame);
+        Spark.put("/game", this::joinGame);
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
 
@@ -45,6 +48,20 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+
+    private Object joinGame(Request req, Response res) {
+        return null;
+    }
+
+    private Object createGame(Request req, Response res) throws DataAccessException{
+        CreateGameRequest createGameRequest = new Gson().fromJson(req.body(), CreateGameRequest.class);
+        CreateGameResponse createGameResponse = gameService.createGame(createGameRequest);
+        return new Gson().toJson(createGameResponse);
+    }
+
+    private Object listGames(Request req, Response res) {
+        return null;
     }
 
     private Object logout(Request req, Response res) throws DataAccessException{
@@ -68,7 +85,6 @@ public class Server {
     }
 
     private Object clearAll(Request req, Response res){
-        authService.clearAuth();
         gameService.clearGames();
         userService.clearUsers();
         res.status(200);

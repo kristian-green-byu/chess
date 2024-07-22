@@ -1,5 +1,6 @@
 package service;
 import dataaccess.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import requests.LoginRequest;
 import requests.LogoutRequest;
@@ -25,11 +26,7 @@ public class UserServiceTests {
     @Test
     public void registerWithNullField(){
         RegisterRequest registerRequest = new RegisterRequest("username", null, "test@email.com");
-        try{
-            userService.register(registerRequest);
-            assert false;
-        } catch (DataAccessException ignored) {}
-        assert true;
+        Assertions.assertThrows(DataAccessException.class, () -> userService.register(registerRequest));
     }
 
     @Test
@@ -37,11 +34,7 @@ public class UserServiceTests {
         RegisterRequest registerRequest1 = new RegisterRequest("username", "password", "test@email.com");
         userService.register(registerRequest1);
         RegisterRequest registerRequest2 = new RegisterRequest("username", "password2", "test2@email.com");
-        try{
-            userService.register(registerRequest2);
-            assert false;
-        } catch (DataAccessException ignored) {}
-        assert true;
+        Assertions.assertThrows(DataAccessException.class, () -> userService.register(registerRequest2));
     }
 
     @Test
@@ -61,11 +54,7 @@ public class UserServiceTests {
     @Test
     public void loginNotRegistered(){
         LoginRequest loginRequest = new LoginRequest("john", "cena");
-        try {
-            userService.login(loginRequest);
-            assert false;
-        } catch (DataAccessException ignored) {}
-        assert true;
+        Assertions.assertThrows(DataAccessException.class, () -> userService.login(loginRequest));
     }
 
     @Test
@@ -73,11 +62,7 @@ public class UserServiceTests {
         RegisterRequest registerRequest = new RegisterRequest("username", "password", "test@email.com");
         userService.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest(null, "password");
-        try{
-            userService.login(loginRequest);
-            assert false;
-        } catch (DataAccessException ignored) {}
-        assert true;
+        Assertions.assertThrows(DataAccessException.class, () -> userService.login(loginRequest));
     }
 
     @Test
@@ -93,10 +78,6 @@ public class UserServiceTests {
     @Test
     public void logoutNotLoggedIn() throws DataAccessException {
         LogoutRequest logoutRequest = new LogoutRequest("authToken");
-        try {
-            userService.logout(logoutRequest);
-            assert false;
-        } catch (DataAccessException ignored) {}
-        assert true;
+        Assertions.assertThrows(DataAccessException.class, () -> userService.logout(logoutRequest));
     }
 }
