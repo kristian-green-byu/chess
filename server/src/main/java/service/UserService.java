@@ -82,9 +82,4 @@ public class UserService{
             return new LogoutResponse();
         }
     }
-
-    public void clearUsers(){
-        authDAO.clearAuthData();
-        userDAO.clearUserData();
-    }
 }

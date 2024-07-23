@@ -51,4 +51,9 @@ public class MemoryGameDAO implements GameDAO{
     public Collection<GameData> listGames(){
         return games.values();
     }
+
+    public void clearGameData(){
+        games.clear();
+        nextID = 1;
+    }
 }

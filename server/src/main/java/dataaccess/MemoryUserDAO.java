@@ -23,5 +23,6 @@ public class MemoryUserDAO implements UserDAO{
 
     public void clearUserData(){
         users.clear();
+        nextID = 1;
     }
 }

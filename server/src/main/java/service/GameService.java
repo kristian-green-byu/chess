@@ -72,7 +72,4 @@ public class GameService {
         Collection<GameData> games = gameDAO.listGames();
         return new ListGamesResponse(games);
     }
-
-    public void clearGames(){
-    }
 }

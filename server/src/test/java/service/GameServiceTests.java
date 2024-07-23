@@ -2,7 +2,6 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.*;
-import model.GameData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import requests.CreateGameRequest;
@@ -13,9 +12,6 @@ import responses.CreateGameResponse;
 import responses.JoinGameResponse;
 import responses.ListGamesResponse;
 import responses.RegisterResponse;
-
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Objects;
 
 public class GameServiceTests {
