@@ -23,21 +23,21 @@ public class UserService{
 
     public RegisterResponse register(RegisterRequest registerRequest) throws DataAccessException {
         if(registerRequest == null){
-            throw new DataAccessException("register request is null");
+            throw new DataAccessException("bad request");
         }
         else if(registerRequest.email() == null){
-            throw new DataAccessException("email is null");
+            throw new DataAccessException("bad request");
         }
         else if(registerRequest.password() == null){
-            throw new DataAccessException("password is null");
+            throw new DataAccessException("bad request");
         }
         else if(registerRequest.username() == null){
-            throw new DataAccessException("username is null");
+            throw new DataAccessException("bad request");
         }
         String username = registerRequest.username();
         UserData userData = userDAO.getUser(username);
         if(userData != null){
-            throw new DataAccessException("username already exists");
+            throw new DataAccessException("already taken");
         }
         else{
             UserData newUser = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());

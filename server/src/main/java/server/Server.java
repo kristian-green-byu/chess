@@ -54,6 +54,15 @@ public class Server {
         if(exceptionMessage.equals("unauthorized")) {
             res.status(401);
         }
+        else if(exceptionMessage.equals("bad request")) {
+            res.status(400);
+        }
+        else if(exceptionMessage.equals("already taken")) {
+            res.status(403);
+        }
+        else {
+            res.status(500);
+        }
         String exceptionJson = "{\n \"message\": \"Error: %s\"\n}".formatted(exceptionMessage);
         res.body(exceptionJson);
     }
