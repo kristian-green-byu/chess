@@ -4,12 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-/**
- * For a class that can manage a chess game, making moves on a board
- * <p>
- * Note: You can add to this class, but you may not alter
- * signature of the existing methods.
- */
 public class ChessGame {
     private ChessBoard chessBoard;
     private TeamColor teamTurn;
@@ -45,18 +39,10 @@ public class ChessGame {
         this.doubleMovePawns = new ArrayList<>();
     }
 
-    /**
-     * @return Which team's turn it is
-     */
     public TeamColor getTeamTurn() {
         return teamTurn;
     }
 
-    /**
-     * Set's which teams turn it is
-     *
-     * @param team the team whose turn it is
-     */
     public void setTeamTurn(TeamColor team) {
         teamTurn = team;
     }
@@ -77,13 +63,6 @@ public class ChessGame {
         }
     }
 
-    /**
-     * Gets a valid moves for a piece at the given location
-     *
-     * @param startPosition the piece to get valid moves for
-     * @return Set of valid moves for requested piece, or null if no piece at
-     * startPosition
-     */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = chessBoard.getPiece(startPosition);
         if (piece != null) {
@@ -154,7 +133,9 @@ public class ChessGame {
         ChessPiece startPiece = chessBoard.getPiece(move.getStartPosition());
         if(endPiece.getPieceType() != ChessPiece.PieceType.KING){
             return false;
-        } else return endPiece.getTeamColor() != startPiece.getTeamColor();
+        } else {
+            return endPiece.getTeamColor() != startPiece.getTeamColor();
+        }
     }
 
     private void updateIsInCheckmate() {
@@ -169,7 +150,9 @@ public class ChessGame {
                 ChessPosition position = new ChessPosition(i, j);
                 ChessPiece piece = chessBoard.getPiece(position);
                 if (piece != null) {
-                    if (checkmateUpdated(piece, position)) return;
+                    if (checkmateUpdated(piece, position)){
+                        return;
+                    }
                 }
             }
         }
@@ -267,7 +250,9 @@ public class ChessGame {
             //add left castle move if possible
             if (teamColor == TeamColor.WHITE && lwCastlePossible || teamColor == TeamColor.BLACK && lbCastlePossible) {
                 if (leftRook != null && leftRook.getPieceType() == ChessPiece.PieceType.ROOK && leftRook.getTeamColor() == teamColor) {
-                    if (leftCastlePossible(row, teamColor, moves)) return;
+                    if (leftCastlePossible(row, teamColor, moves)) {
+                        return;
+                    }
                 }
             }
             //add right castle move if possible
@@ -352,12 +337,6 @@ public class ChessGame {
         rookCastleHelper(move, 8, TeamColor.BLACK);
     }
 
-    /**
-     * Makes a move in a chess game
-     *
-     * @param move chess move to preform
-     * @throws InvalidMoveException if move is invalid
-     */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition startPosition = move.getStartPosition();
         Collection<ChessMove> validMoves = validMoves(startPosition);
@@ -424,7 +403,9 @@ public class ChessGame {
         if(startPosition.equals(new ChessPosition(4, i))){
             return true;
         }
-        else return startPosition.equals(new ChessPosition(5, i));
+        else {
+            return startPosition.equals(new ChessPosition(5, i));
+        }
     }
 
     private static boolean isDoubleMove(ChessMove move, ChessPosition startPosition, ChessPiece.PieceType endPieceType, int i) {
@@ -434,7 +415,9 @@ public class ChessGame {
         if(startPosition.equals(new ChessPosition(2, i)) && move.getEndPosition().equals(new ChessPosition(4, i))){
             return true;
         }
-        else return startPosition.equals(new ChessPosition(7, i)) && move.getEndPosition().equals(new ChessPosition(5, i));
+        else {
+            return startPosition.equals(new ChessPosition(7, i)) && move.getEndPosition().equals(new ChessPosition(5, i));
+        }
     }
 
     private void setCastleFlags(ChessPosition startPosition) {
@@ -455,12 +438,6 @@ public class ChessGame {
         }
     }
 
-    /**
-     * Determines if the given team is in check
-     *
-     * @param teamColor which team to check for check
-     * @return True if the specified team is in check
-     */
     public boolean isInCheck(TeamColor teamColor) {
         if (teamColor == TeamColor.WHITE) {
             return whiteCheck;
@@ -469,12 +446,6 @@ public class ChessGame {
         }
     }
 
-    /**
-     * Determines if the given team is in checkmate
-     *
-     * @param teamColor which team to check for checkmate
-     * @return True if the specified team is in checkmate
-     */
     public boolean isInCheckmate(TeamColor teamColor) {
         if (teamColor == TeamColor.WHITE) {
             return whiteCheckmate;
@@ -483,13 +454,6 @@ public class ChessGame {
         }
     }
 
-    /**
-     * Determines if the given team is in stalemate, which here is defined as having
-     * no valid moves
-     *
-     * @param teamColor which team to check for stalemate
-     * @return True if the specified team is in stalemate, otherwise false
-     */
     public boolean isInStalemate(TeamColor teamColor) {
         if (teamColor == TeamColor.WHITE) {
             return whiteStalemate;
@@ -505,20 +469,10 @@ public class ChessGame {
         rbCastlePossible = true;
     }
 
-    /**
-     * Gets the current chessboard
-     *
-     * @return the chessboard
-     */
     public ChessBoard getBoard() {
         return chessBoard;
     }
 
-    /**
-     * Sets this game's chessboard with a given board
-     *
-     * @param board the new board to use
-     */
     public void setBoard(ChessBoard board) {
         chessBoard = board;
         updateFields();
@@ -526,9 +480,6 @@ public class ChessGame {
         this.doubleMovePawns = new ArrayList<>();
     }
 
-    /**
-     * Enum identifying the 2 possible teams in a chess game
-     */
     public enum TeamColor {
         WHITE, BLACK
     }
