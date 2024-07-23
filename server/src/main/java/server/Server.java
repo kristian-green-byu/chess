@@ -36,6 +36,7 @@ public class Server {
         Spark.get("/game", this::listGames);
         Spark.post("/game", this::createGame);
         Spark.put("/game", this::joinGame);
+        Spark.exception(DataAccessException.class, this::exceptionHandler);
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
 
@@ -46,6 +47,15 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+
+    private void exceptionHandler(DataAccessException ex, Request req, Response res) {
+        String exceptionMessage = ex.getMessage();
+        if(exceptionMessage.equals("unauthorized")) {
+            res.status(401);
+        }
+        String exceptionJson = "{\n \"message\": \"Error: %s\"\n}".formatted(exceptionMessage);
+        res.body(exceptionJson);
     }
 
     private Object joinGame(Request req, Response res) throws DataAccessException {
@@ -83,7 +93,7 @@ public class Server {
         return new Gson().toJson(loginResponse);
     }
 
-    private Object register(Request req, Response res) throws DataAccessException{
+    private Object register(Request req, Response res) throws DataAccessException {
         RegisterRequest registerRequest = new Gson().fromJson(req.body(), RegisterRequest.class);
         RegisterResponse registerResponse = userService.register(registerRequest);
         res.status(200);

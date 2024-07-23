@@ -49,26 +49,26 @@ public class UserService{
 
     public LoginResponse login(LoginRequest loginRequest) throws DataAccessException {
         if(loginRequest == null){
-            throw new DataAccessException("login request is null");
+            throw new DataAccessException("unauthorized");
         }
         else if (loginRequest.password() == null){
-            throw new DataAccessException("password is null");
+            throw new DataAccessException("unauthorized");
         }
         else if (loginRequest.username() == null){
-            throw new DataAccessException("username is null");
+            throw new DataAccessException("unauthorized");
         }
         String username = loginRequest.username();
         String password = loginRequest.password();
         UserData userData = userDAO.getUser(username);
         if(userData != null){
             if(!userData.password().equals(password)){
-                throw new DataAccessException("password does not match");
+                throw new DataAccessException("unauthorized");
             }
             String authToken = authDAO.createAuthData(username);
             return new LoginResponse(username, authToken);
         }
         else {
-            throw new DataAccessException("username not registered");
+            throw new DataAccessException("unauthorized");
         }
     }
 
