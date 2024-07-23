@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.UUID;
 
-public class MemoryAuthDAO implements AuthDAO{
+public class MemoryAuthDAO implements AuthDAO {
     final private HashSet<AuthData> authDataSet = new HashSet<>();
 
     public String createAuthData(String username) {
@@ -16,29 +16,29 @@ public class MemoryAuthDAO implements AuthDAO{
         return authToken;
     }
 
-    public String getAuthToken(String username){
-        for(AuthData authData : authDataSet){
-            if(Objects.equals(authData.username(), username)){
+    public String getAuthToken(String username) {
+        for (AuthData authData : authDataSet) {
+            if (Objects.equals(authData.username(), username)) {
                 return authData.authToken();
             }
         }
         return null;
     }
 
-    public void clearAuthData(){
+    public void clearAuthData() {
         authDataSet.clear();
     }
 
-    public AuthData getAuthData(String authToken){
-        for(AuthData authData : authDataSet){
-            if(authData.authToken().equals(authToken)){
+    public AuthData getAuthData(String authToken) {
+        for (AuthData authData : authDataSet) {
+            if (authData.authToken().equals(authToken)) {
                 return authData;
             }
         }
         return null;
     }
 
-    public void deleteAuthData(AuthData authData){
+    public void deleteAuthData(AuthData authData) {
         authDataSet.remove(authData);
     }
 }

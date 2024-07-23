@@ -1,10 +1,8 @@
 package service;
 
 import dataaccess.AuthDAO;
-import dataaccess.UserDAO;
 import dataaccess.GameDAO;
-import requests.ClearRequest;
-import responses.ClearResponse;
+import dataaccess.UserDAO;
 
 public class ClearService {
     private final AuthDAO authDAO;
@@ -17,10 +15,9 @@ public class ClearService {
         this.gameDAO = gameDAO;
     }
 
-    public ClearResponse clear(ClearRequest clearRequest) {
+    public void clear() {
         authDAO.clearAuthData();
         userDAO.clearUserData();
         gameDAO.clearGameData();
-        return new ClearResponse();
     }
 }

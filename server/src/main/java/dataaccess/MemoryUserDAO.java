@@ -4,24 +4,24 @@ import model.UserData;
 
 import java.util.HashMap;
 
-public class MemoryUserDAO implements UserDAO{
+public class MemoryUserDAO implements UserDAO {
     final private HashMap<Integer, UserData> users = new HashMap<>();
     private int nextID = 1;
 
-    public UserData getUser(String username) throws DataAccessException {
-        for(UserData user : users.values()){
-            if(user.username().equals(username)){
+    public UserData getUser(String username){
+        for (UserData user : users.values()) {
+            if (user.username().equals(username)) {
                 return user;
             }
         }
         return null;
     }
 
-    public void createUser(UserData user){
+    public void createUser(UserData user) {
         users.put(nextID++, user);
     }
 
-    public void clearUserData(){
+    public void clearUserData() {
         users.clear();
         nextID = 1;
     }

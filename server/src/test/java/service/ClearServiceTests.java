@@ -3,7 +3,6 @@ package service;
 import chess.ChessGame;
 import dataaccess.*;
 import org.junit.jupiter.api.Test;
-import requests.ClearRequest;
 import requests.CreateGameRequest;
 import requests.JoinGameRequest;
 import requests.RegisterRequest;
@@ -12,23 +11,23 @@ import responses.RegisterResponse;
 
 
 public class ClearServiceTests {
-    AuthDAO authDAO = new MemoryAuthDAO();
-    GameDAO gameDAO = new MemoryGameDAO();
-    UserDAO userDAO = new MemoryUserDAO();
-    UserService userService = new UserService(authDAO, userDAO);
-    GameService gameService = new GameService(gameDAO, authDAO);
-    ClearService clearService = new ClearService(authDAO, userDAO, gameDAO);
+    final AuthDAO authDAO = new MemoryAuthDAO();
+    final GameDAO gameDAO = new MemoryGameDAO();
+    final UserDAO userDAO = new MemoryUserDAO();
+    final UserService userService = new UserService(authDAO, userDAO);
+    final GameService gameService = new GameService(gameDAO, authDAO);
+    final ClearService clearService = new ClearService(authDAO, userDAO, gameDAO);
 
     @Test
-    public void clear() throws DataAccessException{
-        RegisterRequest registerRequest = new RegisterRequest("testuser", "testpass", "test@email.com");
+    public void clear() throws DataAccessException {
+        RegisterRequest registerRequest = new RegisterRequest("testUser", "testPass", "test@email.com");
         RegisterResponse registerResponse = userService.register(registerRequest);
         String authToken = registerResponse.authToken();
-        CreateGameRequest createGameRequest = new CreateGameRequest(authToken, "testgame");
+        CreateGameRequest createGameRequest = new CreateGameRequest(authToken, "testGame");
         CreateGameResponse createGameResponse = gameService.createGame(createGameRequest);
         JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, ChessGame.TeamColor.BLACK, createGameResponse.gameID());
         gameService.joinGame(joinGameRequest);
-        clearService.clear(new ClearRequest());
-        assert(authDAO.getAuthData(authToken)==null && userDAO.getUser("testuser")==null && gameDAO.getGame(createGameResponse.gameID())==null);
+        clearService.clear();
+        assert (authDAO.getAuthData(authToken) == null && userDAO.getUser("testUser") == null && gameDAO.getGame(createGameResponse.gameID()) == null);
     }
 }

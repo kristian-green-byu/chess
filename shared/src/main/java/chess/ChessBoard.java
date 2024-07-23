@@ -11,6 +11,7 @@ import java.util.Objects;
  */
 public class ChessBoard {
     private ChessPiece[][] tiles = new ChessPiece[8][8];
+
     public ChessBoard() {
     }
 
@@ -30,12 +31,11 @@ public class ChessBoard {
     @Override
     public String toString() {
         StringBuilder chessBoardString = new StringBuilder();
-        for(int i = 7; i >= 0; i--) {
-            for(int j =0; j < 8; j++) {
-                if(tiles[i][j] != null) {
+        for (int i = 7; i >= 0; i--) {
+            for (int j = 0; j < 8; j++) {
+                if (tiles[i][j] != null) {
                     chessBoardString.append('|').append(tiles[i][j].toString());
-                }
-                else {
+                } else {
                     chessBoardString.append("| ");
                 }
             }
@@ -51,7 +51,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        tiles[position.getRow()-1][position.getColumn()-1] = piece;
+        tiles[position.getRow() - 1][position.getColumn() - 1] = piece;
     }
 
     /**
@@ -62,7 +62,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return tiles[position.getRow()-1][position.getColumn()-1];
+        return tiles[position.getRow() - 1][position.getColumn() - 1];
     }
 
     /**
@@ -77,17 +77,17 @@ public class ChessBoard {
             board.addPiece(new ChessPosition(7, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
         }
         //Add in black and white Rooks
-        for(int i = 1; i <= 8; i += 7) {
+        for (int i = 1; i <= 8; i += 7) {
             board.addPiece(new ChessPosition(1, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
             board.addPiece(new ChessPosition(8, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
         }
         //Add in Knights
-        for(int i = 2; i <= 7; i += 5) {
+        for (int i = 2; i <= 7; i += 5) {
             board.addPiece(new ChessPosition(1, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
             board.addPiece(new ChessPosition(8, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
         }
         //Add in Bishops
-        for(int i = 3; i <= 6; i += 3) {
+        for (int i = 3; i <= 6; i += 3) {
             board.addPiece(new ChessPosition(1, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
             board.addPiece(new ChessPosition(8, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
         }

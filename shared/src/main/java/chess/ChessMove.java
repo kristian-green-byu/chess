@@ -14,8 +14,7 @@ public class ChessMove {
     private final ChessPosition endPosition;
     private final ChessPiece.PieceType promotionPiece;
 
-    public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
-                     ChessPiece.PieceType promotionPiece) {
+    public ChessMove(ChessPosition startPosition, ChessPosition endPosition, ChessPiece.PieceType promotionPiece) {
         this.startPosition = startPosition;
         this.endPosition = endPosition;
         this.promotionPiece = promotionPiece;
@@ -60,10 +59,9 @@ public class ChessMove {
 
     @Override
     public String toString() {
-        if(promotionPiece != null){
-            return "Start: " + startPosition.toString() + "\nEnd: " + endPosition.toString() +"\n Promotion: " + promotionPiece;
-        }
-        else {
+        if (promotionPiece != null) {
+            return "Start: " + startPosition.toString() + "\nEnd: " + endPosition.toString() + "\n Promotion: " + promotionPiece;
+        } else {
             return "Start: " + startPosition.toString() + "\nEnd: " + endPosition.toString();
         }
 

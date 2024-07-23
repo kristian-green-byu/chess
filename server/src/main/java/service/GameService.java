@@ -13,6 +13,7 @@ import requests.ListGamesRequest;
 import responses.CreateGameResponse;
 import responses.JoinGameResponse;
 import responses.ListGamesResponse;
+
 import java.util.Collection;
 
 public class GameService {
@@ -26,14 +27,13 @@ public class GameService {
     }
 
     public CreateGameResponse createGame(CreateGameRequest createGameRequest) throws DataAccessException {
-        if(createGameRequest.gameName()==null){
+        if (createGameRequest.gameName() == null) {
             throw new DataAccessException("unauthorized");
-        }
-        else if(authDAO.getAuthData(createGameRequest.authToken())==null){
+        } else if (authDAO.getAuthData(createGameRequest.authToken()) == null) {
             throw new DataAccessException("unauthorized");
         }
         AuthData authData = authDAO.getAuthData(createGameRequest.authToken());
-        if(authData==null){
+        if (authData == null) {
             throw new DataAccessException("unauthorized");
         }
         int gameID = gameDAO.createGame(createGameRequest.gameName());
@@ -42,26 +42,24 @@ public class GameService {
 
     public JoinGameResponse joinGame(JoinGameRequest joinGameRequest) throws DataAccessException {
         AuthData authData = authDAO.getAuthData(joinGameRequest.authToken());
-        if(authData==null){
+        if (authData == null) {
             throw new DataAccessException("unauthorized");
         }
         GameData gameData = gameDAO.getGame(joinGameRequest.gameID());
-        if(gameData==null){
+        if (gameData == null) {
             throw new DataAccessException("bad request");
         }
-        if(joinGameRequest.playerColor() == null){
+        if (joinGameRequest.playerColor() == null) {
             throw new DataAccessException("bad request");
-        }
-        else if(joinGameRequest.playerColor() == ChessGame.TeamColor.WHITE){
-           if(gameData.whiteUsername()!= null){
-               throw new DataAccessException("already taken");
-           }
+        } else if (joinGameRequest.playerColor() == ChessGame.TeamColor.WHITE) {
+            if (gameData.whiteUsername() != null) {
+                throw new DataAccessException("already taken");
+            }
 
-        }
-        else {
-           if(gameData.blackUsername()!= null){
-               throw new DataAccessException("already taken");
-           }
+        } else {
+            if (gameData.blackUsername() != null) {
+                throw new DataAccessException("already taken");
+            }
         }
         gameDAO.updateGame(authData.username(), joinGameRequest.playerColor(), gameData);
         return new JoinGameResponse();
@@ -69,7 +67,7 @@ public class GameService {
 
     public ListGamesResponse listGames(ListGamesRequest listGamesRequest) throws DataAccessException {
         AuthData authData = authDAO.getAuthData(listGamesRequest.authToken());
-        if(authData==null){
+        if (authData == null) {
             throw new DataAccessException("unauthorized");
         }
         Collection<GameData> games = gameDAO.listGames();

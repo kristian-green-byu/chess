@@ -1,4 +1,5 @@
 package service;
+
 import dataaccess.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -10,9 +11,9 @@ import responses.LogoutResponse;
 import responses.RegisterResponse;
 
 public class UserServiceTests {
-    AuthDAO authDAO = new MemoryAuthDAO();
-    UserDAO userDAO = new MemoryUserDAO();
-    UserService userService = new UserService(authDAO, userDAO);
+    final AuthDAO authDAO = new MemoryAuthDAO();
+    final UserDAO userDAO = new MemoryUserDAO();
+    final UserService userService = new UserService(authDAO, userDAO);
 
     @Test
     public void registerSuccess() throws DataAccessException {
@@ -24,7 +25,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void registerWithNullField(){
+    public void registerWithNullField() {
         RegisterRequest registerRequest = new RegisterRequest("username", null, "test@email.com");
         Assertions.assertThrows(DataAccessException.class, () -> userService.register(registerRequest));
     }
@@ -52,7 +53,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void loginNotRegistered(){
+    public void loginNotRegistered() {
         LoginRequest loginRequest = new LoginRequest("john", "cena");
         Assertions.assertThrows(DataAccessException.class, () -> userService.login(loginRequest));
     }
@@ -72,11 +73,11 @@ public class UserServiceTests {
         String authToken = registerResponse.authToken();
         LogoutRequest logoutRequest = new LogoutRequest(authToken);
         LogoutResponse logoutResponse = userService.logout(logoutRequest);
-        assert logoutResponse != null && authDAO.getAuthData(authToken)==null;
+        assert logoutResponse != null && authDAO.getAuthData(authToken) == null;
     }
 
     @Test
-    public void logoutNotLoggedIn() throws DataAccessException {
+    public void logoutNotLoggedIn() {
         LogoutRequest logoutRequest = new LogoutRequest("authToken");
         Assertions.assertThrows(DataAccessException.class, () -> userService.logout(logoutRequest));
     }

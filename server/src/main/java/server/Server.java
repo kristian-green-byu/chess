@@ -8,7 +8,9 @@ import responses.*;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
-import spark.*;
+import spark.Request;
+import spark.Response;
+import spark.Spark;
 
 public class Server {
     private final GameService gameService;
@@ -73,7 +75,7 @@ public class Server {
         return new Gson().toJson(joinGameResponse);
     }
 
-    private Object createGame(Request req, Response res) throws DataAccessException{
+    private Object createGame(Request req, Response res) throws DataAccessException {
         String authToken = req.headers("Authorization");
         CreateGameRequest createGameName = new Gson().fromJson(req.body(), CreateGameRequest.class);
         String name = createGameName.gameName();
@@ -90,7 +92,7 @@ public class Server {
         return new Gson().toJson(listGamesResponse);
     }
 
-    private Object logout(Request req, Response res) throws DataAccessException{
+    private Object logout(Request req, Response res) throws DataAccessException {
         LogoutRequest logoutRequest = new LogoutRequest(req.headers("Authorization"));
         LogoutResponse LogoutResponse = userService.logout(logoutRequest);
         res.status(200);
@@ -111,9 +113,9 @@ public class Server {
         return new Gson().toJson(registerResponse);
     }
 
-    private Object clearApplication(Request req, Response res){
-        ClearResponse clearResponse = clearService.clear(new ClearRequest());
+    private Object clearApplication(Request req, Response res) {
+        clearService.clear();
         res.status(200);
-        return new Gson().toJson(clearResponse);
+        return "";
     }
 }
