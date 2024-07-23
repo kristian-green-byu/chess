@@ -51,17 +51,11 @@ public class Server {
 
     private void exceptionHandler(DataAccessException ex, Request req, Response res) {
         String exceptionMessage = ex.getMessage();
-        if(exceptionMessage.equals("unauthorized")) {
-            res.status(401);
-        }
-        else if(exceptionMessage.equals("bad request")) {
-            res.status(400);
-        }
-        else if(exceptionMessage.equals("already taken")) {
-            res.status(403);
-        }
-        else {
-            res.status(500);
+        switch (exceptionMessage) {
+            case "unauthorized" -> res.status(401);
+            case "bad request" -> res.status(400);
+            case "already taken" -> res.status(403);
+            default -> res.status(500);
         }
         String exceptionJson = "{\n \"message\": \"Error: %s\"\n}".formatted(exceptionMessage);
         res.body(exceptionJson);
@@ -89,7 +83,7 @@ public class Server {
     }
 
     private Object logout(Request req, Response res) throws DataAccessException{
-        LogoutRequest logoutRequest = new Gson().fromJson(req.headers("Authorization"), LogoutRequest.class);
+        LogoutRequest logoutRequest = new LogoutRequest(req.headers("Authorization"));
         LogoutResponse LogoutResponse = userService.logout(logoutRequest);
         res.status(200);
         return new Gson().toJson(LogoutResponse);

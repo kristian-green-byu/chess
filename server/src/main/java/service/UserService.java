@@ -75,7 +75,7 @@ public class UserService{
     public LogoutResponse logout(LogoutRequest logoutRequest) throws DataAccessException {
         AuthData authData = authDAO.getAuthData(logoutRequest.authToken());
         if(authData == null){
-            throw new DataAccessException("user not logged in");
+            throw new DataAccessException("unauthorized");
         }
         else{
             authDAO.deleteAuthData(authData);
