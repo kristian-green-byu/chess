@@ -3,6 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import model.GameData;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -45,5 +46,9 @@ public class MemoryGameDAO implements GameDAO{
         }
         games.remove(id);
         games.put(id, newGameData);
+    }
+
+    public Collection<GameData> listGames(){
+        return games.values();
     }
 }

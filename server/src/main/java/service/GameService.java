@@ -9,8 +9,11 @@ import model.AuthData;
 import model.GameData;
 import requests.CreateGameRequest;
 import requests.JoinGameRequest;
+import requests.ListGamesRequest;
 import responses.CreateGameResponse;
 import responses.JoinGameResponse;
+import responses.ListGamesResponse;
+import java.util.Collection;
 
 public class GameService {
 
@@ -59,6 +62,15 @@ public class GameService {
         }
         gameDAO.updateGame(authData.username(), joinGameRequest.playerColor(), gameData);
         return new JoinGameResponse();
+    }
+
+    public ListGamesResponse listGames(ListGamesRequest listGamesRequest) throws DataAccessException {
+        AuthData authData = authDAO.getAuthData(listGamesRequest.authToken());
+        if(authData==null){
+            throw new DataAccessException("unauthorized");
+        }
+        Collection<GameData> games = gameDAO.listGames();
+        return new ListGamesResponse(games);
     }
 
     public void clearGames(){

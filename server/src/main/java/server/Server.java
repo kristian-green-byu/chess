@@ -47,7 +47,7 @@ public class Server {
     private Object joinGame(Request req, Response res) throws DataAccessException {
         JoinGameRequest joinGameRequest = new Gson().fromJson(req.body(), JoinGameRequest.class);
         JoinGameResponse joinGameResponse = gameService.joinGame(joinGameRequest);
-        return null;
+        return new Gson().toJson(joinGameResponse);
     }
 
     private Object createGame(Request req, Response res) throws DataAccessException{
@@ -56,8 +56,10 @@ public class Server {
         return new Gson().toJson(createGameResponse);
     }
 
-    private Object listGames(Request req, Response res) {
-        return null;
+    private Object listGames(Request req, Response res) throws DataAccessException {
+        ListGamesRequest listGamesRequest = new Gson().fromJson(req.headers("Authorization"), ListGamesRequest.class);
+        ListGamesResponse listGamesResponse = gameService.listGames(listGamesRequest);
+        return new Gson().toJson(listGamesResponse);
     }
 
     private Object logout(Request req, Response res) throws DataAccessException{

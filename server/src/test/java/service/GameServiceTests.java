@@ -2,15 +2,20 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.*;
+import model.GameData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import requests.CreateGameRequest;
 import requests.JoinGameRequest;
+import requests.ListGamesRequest;
 import requests.RegisterRequest;
 import responses.CreateGameResponse;
 import responses.JoinGameResponse;
+import responses.ListGamesResponse;
 import responses.RegisterResponse;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 
 public class GameServiceTests {
@@ -62,5 +67,21 @@ public class GameServiceTests {
         String authToken2 = registerResponse2.authToken();
         JoinGameRequest joinGameRequest2 = new JoinGameRequest(authToken2, ChessGame.TeamColor.BLACK, createGameResponse.gameID());
         Assertions.assertThrows(DataAccessException.class, () -> gameService.joinGame(joinGameRequest2));
+    }
+
+    @Test
+    public void ListGamesSuccess() throws DataAccessException {
+        RegisterRequest registerRequest = new RegisterRequest("testuser", "testpass", "test@email.com");
+        RegisterResponse registerResponse = userService.register(registerRequest);
+        String authToken = registerResponse.authToken();
+        CreateGameRequest createGameRequest = new CreateGameRequest(authToken, "testgame");
+        CreateGameResponse createGameResponse = gameService.createGame(createGameRequest);
+        ListGamesResponse listGamesResponse = gameService.listGames(new ListGamesRequest(authToken));
+        assert listGamesResponse.games().contains(gameDAO.getGame(createGameResponse.gameID()));
+    }
+
+    @Test
+    public void ListGamesUnauthorized(){
+        Assertions.assertThrows(DataAccessException.class, () -> gameService.listGames(new ListGamesRequest("hax")));
     }
 }
