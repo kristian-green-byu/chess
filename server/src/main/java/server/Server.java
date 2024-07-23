@@ -69,7 +69,10 @@ public class Server {
     }
 
     private Object createGame(Request req, Response res) throws DataAccessException{
-        CreateGameRequest createGameRequest = new Gson().fromJson(req.body(), CreateGameRequest.class);
+        String authToken = req.headers("Authorization");
+        CreateGameRequest createGameName = new Gson().fromJson(req.body(), CreateGameRequest.class);
+        String name = createGameName.gameName();
+        CreateGameRequest createGameRequest = new CreateGameRequest(authToken, name);
         CreateGameResponse createGameResponse = gameService.createGame(createGameRequest);
         res.status(200);
         return new Gson().toJson(createGameResponse);
