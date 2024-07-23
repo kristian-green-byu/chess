@@ -24,10 +24,10 @@ public class ClearServiceTests {
         RegisterResponse registerResponse = userService.register(registerRequest);
         String authToken = registerResponse.authToken();
         CreateGameRequest createGameRequest = new CreateGameRequest(authToken, "testGame");
-        CreateGameResponse createGameResponse = gameService.createGame(createGameRequest);
-        JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, ChessGame.TeamColor.BLACK, createGameResponse.gameID());
+        CreateGameResponse createGameRes = gameService.createGame(createGameRequest);
+        JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, ChessGame.TeamColor.BLACK, createGameRes.gameID());
         gameService.joinGame(joinGameRequest);
         clearService.clear();
-        assert (authDAO.getAuthData(authToken) == null && userDAO.getUser("testUser") == null && gameDAO.getGame(createGameResponse.gameID()) == null);
+        assert (authDAO.getAuthData(authToken) == null && userDAO.getUser("testUser") == null && gameDAO.getGame(createGameRes.gameID()) == null);
     }
 }

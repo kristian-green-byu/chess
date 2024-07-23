@@ -67,7 +67,7 @@ public class GameServiceTests {
     }
 
     @Test
-    public void ListGamesSuccess() throws DataAccessException {
+    public void listGamesSuccess() throws DataAccessException {
         RegisterRequest registerRequest = new RegisterRequest("testUser", "testPass", "test@email.com");
         RegisterResponse registerResponse = userService.register(registerRequest);
         String authToken = registerResponse.authToken();
@@ -78,7 +78,7 @@ public class GameServiceTests {
     }
 
     @Test
-    public void ListGamesUnauthorized() {
+    public void listGamesUnauthorized() {
         Assertions.assertThrows(DataAccessException.class, () -> gameService.listGames(new ListGamesRequest("hax")));
     }
 }

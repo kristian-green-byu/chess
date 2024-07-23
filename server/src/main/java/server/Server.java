@@ -94,9 +94,9 @@ public class Server {
 
     private Object logout(Request req, Response res) throws DataAccessException {
         LogoutRequest logoutRequest = new LogoutRequest(req.headers("Authorization"));
-        LogoutResponse LogoutResponse = userService.logout(logoutRequest);
+        LogoutResponse logoutResponse = userService.logout(logoutRequest);
         res.status(200);
-        return new Gson().toJson(LogoutResponse);
+        return new Gson().toJson(logoutResponse);
     }
 
     private Object login(Request req, Response res) throws DataAccessException {

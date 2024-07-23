@@ -21,8 +21,12 @@ public class ChessPiece {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o){
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()){
+            return false;
+        }
         ChessPiece that = (ChessPiece) o;
         return pieceColor == that.pieceColor && type == that.type;
     }
@@ -90,55 +94,55 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
 
         if (type == ChessPiece.PieceType.BISHOP) {
-            return CalculateBishopMoves(board, myPosition);
+            return calculateBishopMoves(board, myPosition);
         } else if (type == ChessPiece.PieceType.KING) {
-            return CalculateKingMoves(board, myPosition);
+            return calculateKingMoves(board, myPosition);
         } else if (type == ChessPiece.PieceType.KNIGHT) {
-            return CalculateKnightMoves(board, myPosition);
+            return calculateKnightMoves(board, myPosition);
         } else if (type == ChessPiece.PieceType.PAWN) {
-            return CalculatePawnMoves(board, myPosition);
+            return calculatePawnMoves(board, myPosition);
         } else if (type == ChessPiece.PieceType.QUEEN) {
-            return CalculateQueenMoves(board, myPosition);
+            return calculateQueenMoves(board, myPosition);
         } else if (type == ChessPiece.PieceType.ROOK) {
             Collection<ChessMove> moves = new ArrayList<>();
-            return CalculateRookMoves(board, myPosition, moves);
+            return calculateRookMoves(board, myPosition, moves);
         }
         return new ArrayList<>();
     }
 
-    public Collection<ChessMove> CalculateRookMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
+    public Collection<ChessMove> calculateRookMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves) {
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         for (int i = 1; i < 8; i++) {
-            if (!MoveHelper(board, myPosition, moves, row + i, col, null)) {
+            if (!moveHelper(board, myPosition, moves, row + i, col, null)) {
                 break;
             }
         }
         for (int i = 1; i < 8; i++) {
-            if (!MoveHelper(board, myPosition, moves, row - i, col, null)) {
+            if (!moveHelper(board, myPosition, moves, row - i, col, null)) {
                 break;
             }
         }
         for (int i = 1; i < 8; i++) {
-            if (!MoveHelper(board, myPosition, moves, row, col - i, null)) {
+            if (!moveHelper(board, myPosition, moves, row, col - i, null)) {
                 break;
             }
         }
         for (int i = 1; i < 8; i++) {
-            if (!MoveHelper(board, myPosition, moves, row, col + i, null)) {
+            if (!moveHelper(board, myPosition, moves, row, col + i, null)) {
                 break;
             }
         }
         return moves;
     }
 
-    public Collection<ChessMove> CalculateQueenMoves(ChessBoard board, ChessPosition myPosition) {
+    public Collection<ChessMove> calculateQueenMoves(ChessBoard board, ChessPosition myPosition) {
         //Calculates possible Queen Moves by combining Rook and Bishop logic.
-        Collection<ChessMove> moves = CalculateBishopMoves(board, myPosition);
-        return CalculateRookMoves(board, myPosition, moves);
+        Collection<ChessMove> moves = calculateBishopMoves(board, myPosition);
+        return calculateRookMoves(board, myPosition, moves);
     }
 
-    public boolean PawnHelper(ChessBoard board, ChessPosition myPosition, int x, int y, ChessPiece.PieceType promotionPiece, Collection<ChessMove> moves) {
+    public boolean pawnHelper(ChessBoard board, ChessPosition myPos, int x, int y, ChessPiece.PieceType promotion, Collection<ChessMove> moves) {
         //Handles additional functions for calculating pawn moves such as promotion and possible captures
         if (x <= 8 && x >= 1 && y <= 8 && y >= 1) {
             ChessPosition desiredPosition = new ChessPosition(x, y);
@@ -146,23 +150,23 @@ public class ChessPiece {
             ChessPosition frontRight = new ChessPosition(x, y + 1);
             if (y - 1 > 0 && board.getPiece(frontLeft) != null) {
                 if (board.getPiece(frontLeft).getTeamColor() != pieceColor) {
-                    moves.add(new chess.ChessMove(myPosition, frontLeft, promotionPiece));
+                    moves.add(new chess.ChessMove(myPos, frontLeft, promotion));
                 }
             }
             if (y + 1 < 8 && board.getPiece(frontRight) != null) {
                 if (board.getPiece(frontRight).getTeamColor() != pieceColor) {
-                    moves.add(new chess.ChessMove(myPosition, frontRight, promotionPiece));
+                    moves.add(new chess.ChessMove(myPos, frontRight, promotion));
                 }
             }
             if (board.getPiece(desiredPosition) == null) {
-                moves.add(new chess.ChessMove(myPosition, desiredPosition, promotionPiece));
+                moves.add(new chess.ChessMove(myPos, desiredPosition, promotion));
                 return true;
             }
         }
         return false;
     }
 
-    public Collection<ChessMove> CalculatePawnMoves(ChessBoard board, ChessPosition myPosition) {
+    public Collection<ChessMove> calculatePawnMoves(ChessBoard board, ChessPosition myPosition) {
         //Uses PawnHelper function to help calculate possible moves in all scenarios for pawns.
         //PawnHelper also handles promotions.
         Collection<ChessMove> moves = new ArrayList<>();
@@ -170,77 +174,77 @@ public class ChessPiece {
         int col = myPosition.getColumn();
         //These two are cases for non-promotion and non-starting pawn moves
         if (pieceColor == ChessGame.TeamColor.WHITE && row > 2 && row < 7) {
-            PawnHelper(board, myPosition, row + 1, col, null, moves);
+            pawnHelper(board, myPosition, row + 1, col, null, moves);
         } else if (pieceColor == ChessGame.TeamColor.BLACK && row < 7 && row > 2) {
-            PawnHelper(board, myPosition, row - 1, col, null, moves);
+            pawnHelper(board, myPosition, row - 1, col, null, moves);
         }
         //Cases for black/white starting moves
         else if (pieceColor == ChessGame.TeamColor.WHITE && row == 2) {
-            if (PawnHelper(board, myPosition, row + 1, col, null, moves)) {
-                PawnHelper(board, myPosition, row + 2, col, null, moves);
+            if (pawnHelper(board, myPosition, row + 1, col, null, moves)) {
+                pawnHelper(board, myPosition, row + 2, col, null, moves);
             }
         } else if (pieceColor == ChessGame.TeamColor.BLACK && row == 7) {
-            if (PawnHelper(board, myPosition, row - 1, col, null, moves)) {
-                PawnHelper(board, myPosition, row - 2, col, null, moves);
+            if (pawnHelper(board, myPosition, row - 1, col, null, moves)) {
+                pawnHelper(board, myPosition, row - 2, col, null, moves);
             }
         }
         //Cases for black/white promotion
         if (pieceColor == ChessGame.TeamColor.WHITE && row == 7) {
-            PawnHelper(board, myPosition, row + 1, col, PieceType.QUEEN, moves);
-            PawnHelper(board, myPosition, row + 1, col, PieceType.KNIGHT, moves);
-            PawnHelper(board, myPosition, row + 1, col, PieceType.ROOK, moves);
-            PawnHelper(board, myPosition, row + 1, col, PieceType.BISHOP, moves);
+            pawnHelper(board, myPosition, row + 1, col, PieceType.QUEEN, moves);
+            pawnHelper(board, myPosition, row + 1, col, PieceType.KNIGHT, moves);
+            pawnHelper(board, myPosition, row + 1, col, PieceType.ROOK, moves);
+            pawnHelper(board, myPosition, row + 1, col, PieceType.BISHOP, moves);
         } else if (pieceColor == ChessGame.TeamColor.BLACK && row == 2) {
-            PawnHelper(board, myPosition, row - 1, col, PieceType.QUEEN, moves);
-            PawnHelper(board, myPosition, row - 1, col, PieceType.KNIGHT, moves);
-            PawnHelper(board, myPosition, row - 1, col, PieceType.ROOK, moves);
-            PawnHelper(board, myPosition, row - 1, col, PieceType.BISHOP, moves);
+            pawnHelper(board, myPosition, row - 1, col, PieceType.QUEEN, moves);
+            pawnHelper(board, myPosition, row - 1, col, PieceType.KNIGHT, moves);
+            pawnHelper(board, myPosition, row - 1, col, PieceType.ROOK, moves);
+            pawnHelper(board, myPosition, row - 1, col, PieceType.BISHOP, moves);
         }
         return moves;
     }
 
-    public Collection<ChessMove> CalculateKnightMoves(ChessBoard board, ChessPosition myPosition) {
+    public Collection<ChessMove> calculateKnightMoves(ChessBoard board, ChessPosition myPosition) {
         //Uses MoveHelper function to check all squares next to King to see if moves are available
         Collection<ChessMove> moves = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
-        MoveHelper(board, myPosition, moves, row + 2, col + 1, null);
-        MoveHelper(board, myPosition, moves, row + 2, col - 1, null);
-        MoveHelper(board, myPosition, moves, row + 1, col - 2, null);
-        MoveHelper(board, myPosition, moves, row + 1, col + 2, null);
-        MoveHelper(board, myPosition, moves, row - 1, col - 2, null);
-        MoveHelper(board, myPosition, moves, row - 1, col + 2, null);
-        MoveHelper(board, myPosition, moves, row - 2, col + 1, null);
-        MoveHelper(board, myPosition, moves, row - 2, col - 1, null);
+        moveHelper(board, myPosition, moves, row + 2, col + 1, null);
+        moveHelper(board, myPosition, moves, row + 2, col - 1, null);
+        moveHelper(board, myPosition, moves, row + 1, col - 2, null);
+        moveHelper(board, myPosition, moves, row + 1, col + 2, null);
+        moveHelper(board, myPosition, moves, row - 1, col - 2, null);
+        moveHelper(board, myPosition, moves, row - 1, col + 2, null);
+        moveHelper(board, myPosition, moves, row - 2, col + 1, null);
+        moveHelper(board, myPosition, moves, row - 2, col - 1, null);
         return moves;
     }
 
-    public Collection<ChessMove> CalculateKingMoves(ChessBoard board, ChessPosition myPosition) {
+    public Collection<ChessMove> calculateKingMoves(ChessBoard board, ChessPosition myPosition) {
         //Uses MoveHelper function to check all squares next to King to see if moves are available
         Collection<ChessMove> moves = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
-        MoveHelper(board, myPosition, moves, row + 1, col, null);
-        MoveHelper(board, myPosition, moves, row + 1, col + 1, null);
-        MoveHelper(board, myPosition, moves, row + 1, col - 1, null);
-        MoveHelper(board, myPosition, moves, row, col - 1, null);
-        MoveHelper(board, myPosition, moves, row, col + 1, null);
-        MoveHelper(board, myPosition, moves, row - 1, col, null);
-        MoveHelper(board, myPosition, moves, row - 1, col + 1, null);
-        MoveHelper(board, myPosition, moves, row - 1, col - 1, null);
+        moveHelper(board, myPosition, moves, row + 1, col, null);
+        moveHelper(board, myPosition, moves, row + 1, col + 1, null);
+        moveHelper(board, myPosition, moves, row + 1, col - 1, null);
+        moveHelper(board, myPosition, moves, row, col - 1, null);
+        moveHelper(board, myPosition, moves, row, col + 1, null);
+        moveHelper(board, myPosition, moves, row - 1, col, null);
+        moveHelper(board, myPosition, moves, row - 1, col + 1, null);
+        moveHelper(board, myPosition, moves, row - 1, col - 1, null);
         return moves;
     }
 
-    public boolean MoveHelper(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, int x, int y, ChessPiece.PieceType promotionPiece) {
+    public boolean moveHelper(ChessBoard board, ChessPosition myPos, Collection<ChessMove> moves, int x, int y, ChessPiece.PieceType promotion) {
         //Checks if desired move is out of bounds or if piece is already located at desired position
         if (x <= 8 && x >= 1 && y <= 8 && y >= 1) {
             ChessPosition desiredPosition = new ChessPosition(x, y);
             if (board.getPiece(desiredPosition) == null) {
-                moves.add(new chess.ChessMove(myPosition, desiredPosition, promotionPiece));
+                moves.add(new chess.ChessMove(myPos, desiredPosition, promotion));
                 return true;
             } else {
                 if (board.getPiece(desiredPosition).getTeamColor() != pieceColor) {
-                    moves.add(new chess.ChessMove(myPosition, desiredPosition, promotionPiece));
+                    moves.add(new chess.ChessMove(myPos, desiredPosition, promotion));
                 }
                 return false;
             }
@@ -248,28 +252,28 @@ public class ChessPiece {
         return false;
     }
 
-    public Collection<ChessMove> CalculateBishopMoves(ChessBoard board, ChessPosition myPosition) {
+    public Collection<ChessMove> calculateBishopMoves(ChessBoard board, ChessPosition myPosition) {
         //Calculates all possible diagonal moves for bishop using MoveHelper function.
         Collection<ChessMove> moves = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         for (int i = 1; i < 8; i++) {
-            if (!MoveHelper(board, myPosition, moves, row + i, col + i, null)) {
+            if (!moveHelper(board, myPosition, moves, row + i, col + i, null)) {
                 break;
             }
         }
         for (int i = 1; i < 8; i++) {
-            if (!MoveHelper(board, myPosition, moves, row - i, col + i, null)) {
+            if (!moveHelper(board, myPosition, moves, row - i, col + i, null)) {
                 break;
             }
         }
         for (int i = 1; i < 8; i++) {
-            if (!MoveHelper(board, myPosition, moves, row + i, col - i, null)) {
+            if (!moveHelper(board, myPosition, moves, row + i, col - i, null)) {
                 break;
             }
         }
         for (int i = 1; i < 8; i++) {
-            if (!MoveHelper(board, myPosition, moves, row - i, col - i, null)) {
+            if (!moveHelper(board, myPosition, moves, row - i, col - i, null)) {
                 break;
             }
         }

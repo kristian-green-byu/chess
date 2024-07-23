@@ -13,7 +13,9 @@ public class MemoryGameDAO implements GameDAO {
 
     public int createGame(String name) {
         int gameID = UUID.randomUUID().hashCode();
-        if (gameID < 0) gameID = -gameID;
+        if (gameID < 0){
+            gameID = -gameID;
+        }
         ChessGame game = new ChessGame();
         GameData gameData = new GameData(gameID, null, null, name, game);
         games.put(nextID++, gameData);
