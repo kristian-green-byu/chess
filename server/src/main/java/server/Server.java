@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.*;
 import requests.*;
@@ -62,7 +63,11 @@ public class Server {
     }
 
     private Object joinGame(Request req, Response res) throws DataAccessException {
-        JoinGameRequest joinGameRequest = new Gson().fromJson(req.body(), JoinGameRequest.class);
+        String authToken = req.headers("Authorization");
+        JoinGameRequest joinGameBodyInfo = new Gson().fromJson(req.body(), JoinGameRequest.class);
+        ChessGame.TeamColor playerColor = joinGameBodyInfo.playerColor();
+        int gameID = joinGameBodyInfo.gameID();
+        JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, playerColor, gameID);
         JoinGameResponse joinGameResponse = gameService.joinGame(joinGameRequest);
         res.status(200);
         return new Gson().toJson(joinGameResponse);
@@ -79,7 +84,7 @@ public class Server {
     }
 
     private Object listGames(Request req, Response res) throws DataAccessException {
-        ListGamesRequest listGamesRequest = new Gson().fromJson(req.headers("Authorization"), ListGamesRequest.class);
+        ListGamesRequest listGamesRequest = new ListGamesRequest(req.headers("Authorization"));
         ListGamesResponse listGamesResponse = gameService.listGames(listGamesRequest);
         res.status(200);
         return new Gson().toJson(listGamesResponse);
