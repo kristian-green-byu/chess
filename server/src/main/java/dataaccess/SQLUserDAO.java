@@ -14,8 +14,9 @@ public class SQLUserDAO implements UserDAO{
         return null;
     }
 
-    public void createUser(UserData user){
-
+    public void createUser(UserData user) throws DataAccessException{
+        var statement = databaseManager.setDB("INSERT INTO %DB_NAME%.userData (username, password, email) VALUES (?, ?, ?)");
+        databaseManager.executeUpdate(statement, user.username(), user.password(), user.email());
     }
 
     public void clearUserData() throws DataAccessException {
