@@ -4,8 +4,10 @@ import model.UserData;
 
 public class SQLUserDAO implements UserDAO{
 
+    private final DatabaseManager databaseManager;
+
     public SQLUserDAO() throws DataAccessException{
-        DatabaseManager.configureDatabase();
+        this.databaseManager = new DatabaseManager();
     }
 
     public UserData getUser(String username){
@@ -16,7 +18,8 @@ public class SQLUserDAO implements UserDAO{
 
     }
 
-    public void clearUserData(){
-
+    public void clearUserData() throws DataAccessException {
+        var statement = databaseManager.setDB("TRUNCATE %DB_NAME%.userData");
+        databaseManager.executeUpdate(statement);
     }
 }

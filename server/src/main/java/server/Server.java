@@ -113,7 +113,7 @@ public class Server {
         return new Gson().toJson(registerResponse);
     }
 
-    private Object clearApplication(Request req, Response res) {
+    private Object clearApplication(Request req, Response res) throws DataAccessException{
         clearService.clear();
         res.status(200);
         return "";

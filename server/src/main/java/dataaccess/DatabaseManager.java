@@ -3,11 +3,15 @@ package dataaccess;
 import java.sql.*;
 import java.util.Properties;
 
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
+import static java.sql.Types.NULL;
+
 public class DatabaseManager {
     private static final String DATABASE_NAME;
     private static final String USER;
     private static final String PASSWORD;
     private static final String CONNECTION_URL;
+    private DataAccessConfig config;
 
     /*
      * Load the database information for the db.properties file.
@@ -31,6 +35,12 @@ public class DatabaseManager {
         } catch (Exception ex) {
             throw new RuntimeException("unable to process db.properties. " + ex.getMessage());
         }
+    }
+
+    public DatabaseManager() throws DataAccessException {
+        configureDatabase();
+        config = new DataAccessConfig(CONNECTION_URL, USER, PASSWORD, DATABASE_NAME);
+        this.config = config;
     }
 
     /**
@@ -100,6 +110,37 @@ public class DatabaseManager {
             """
 
     };
+
+    public String setDB(String statement) {
+        return statement.replace("%DB_NAME%", config.dbName());
+    }
+
+    public int executeUpdate(String statement, Object... params) throws DataAccessException {
+        try (var conn = getConnection()) {
+            try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
+                for (var i = 0; i < params.length; i++) {
+                    var param = params[i];
+                    switch (param) {
+                        case String s -> ps.setString(i + 1, s);
+                        case Integer x -> ps.setInt(i + 1, x);
+                        case null -> ps.setNull(i + 1, NULL);
+                        default -> {
+                        }
+                    }
+                }
+                ps.executeUpdate();
+
+                var rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
+        }
+    }
 
     public static void configureDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
