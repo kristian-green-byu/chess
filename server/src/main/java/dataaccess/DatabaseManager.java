@@ -85,7 +85,7 @@ public class DatabaseManager {
             CREATE TABLE IF NOT EXISTS  authData (
               `authID` int NOT NULL AUTO_INCREMENT,
               `authToken` varchar(255) NOT NULL,
-              `userid` int NOT NULL ,
+              `username` varchar(256) NOT NULL,
               PRIMARY KEY (`authID`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """,
