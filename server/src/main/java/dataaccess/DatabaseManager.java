@@ -80,7 +80,7 @@ public class DatabaseManager {
         }
     }
 
-    private static final String[] createStatements = {
+    private static final String[] CREATE_STATEMENTS = {
             """
             CREATE TABLE IF NOT EXISTS  authData (
               `authID` int NOT NULL AUTO_INCREMENT,
@@ -120,12 +120,7 @@ public class DatabaseManager {
             try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 for (var i = 0; i < params.length; i++) {
                     var param = params[i];
-                    switch (param) {
-                        case String s -> ps.setString(i + 1, s);
-                        case Integer x -> ps.setInt(i + 1, x);
-                        case null -> ps.setNull(i + 1, NULL);
-                        default -> {}
-                    }
+                    selectPrepareStatement(param, ps, i);
                 }
                 ps.executeUpdate();
 
@@ -141,10 +136,19 @@ public class DatabaseManager {
         }
     }
 
+    private static void selectPrepareStatement(Object param, PreparedStatement ps, int i) throws SQLException {
+        switch (param) {
+            case String s -> ps.setString(i + 1, s);
+            case Integer x -> ps.setInt(i + 1, x);
+            case null -> ps.setNull(i + 1, NULL);
+            default -> {}
+        }
+    }
+
     public static void configureDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
+            for (var statement : CREATE_STATEMENTS) {
                 try (var preparedStatement = conn.prepareStatement(statement)) {
                     preparedStatement.executeUpdate();
                 }

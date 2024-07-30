@@ -11,10 +11,10 @@ import java.util.Collection;
 import java.util.UUID;
 
 public class SQLGameDAO implements GameDAO{
-    private final DatabaseManager databaseManager;
+    private final DatabaseManager db;
 
     public SQLGameDAO() throws DataAccessException{
-        this.databaseManager = new DatabaseManager();
+        this.db = new DatabaseManager();
     }
 
     public int createGame(String name) throws DataAccessException {
@@ -24,8 +24,8 @@ public class SQLGameDAO implements GameDAO{
         }
         ChessGame game = new ChessGame();
         var gameJSON = new Gson().toJson(game, ChessGame.class);
-        var statement = databaseManager.setDB("INSERT INTO %DB_NAME%.gameData (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)");
-        databaseManager.executeUpdate(statement, gameID, null, null, name, gameJSON);
+        var statement = db.setDB("INSERT INTO %DB_NAME%.gameData (gameID, gameName, game) VALUES (?, ?, ?)");
+        db.executeUpdate(statement, gameID, name, gameJSON);
         return gameID;
     }
 
@@ -42,7 +42,7 @@ public class SQLGameDAO implements GameDAO{
     private Collection<GameData> getGameDataCollection() throws DataAccessException {
         Collection<GameData> games = new ArrayList<>();
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = databaseManager.setDB("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM %DB_NAME%.gameData");
+            var statement = db.setDB("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM %DB_NAME%.gameData");
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -74,19 +74,19 @@ public class SQLGameDAO implements GameDAO{
             throw new DataAccessException("unauthorized");
         }
         Collection<GameData> games = getGameDataCollection();
-        GameData newGameData;
+        GameData newGame;
         if (playerColor == ChessGame.TeamColor.WHITE) {
-            newGameData = new GameData(gameData.gameID(), name, gameData.blackUsername(), gameData.gameName(), gameData.game());
+            newGame = new GameData(gameData.gameID(), name, gameData.blackUsername(), gameData.gameName(), gameData.game());
         } else {
-            newGameData = new GameData(gameData.gameID(), gameData.whiteUsername(), name, gameData.gameName(), gameData.game());
+            newGame = new GameData(gameData.gameID(), gameData.whiteUsername(), name, gameData.gameName(), gameData.game());
         }
         for (GameData game : games) {
             if(game.gameID() == gameData.gameID()) {
-                var statement = databaseManager.setDB("DELETE FROM %DB_NAME%.gameData WHERE gameID = ?");
-                databaseManager.executeUpdate(statement, gameData.gameID());
-                var statement2 = databaseManager.setDB("INSERT INTO %DB_NAME%.gameData (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)");
-                var gameJSON = new Gson().toJson(newGameData.game(), ChessGame.class);
-                databaseManager.executeUpdate(statement2, newGameData.gameID(), newGameData.whiteUsername(), newGameData.blackUsername(), newGameData.gameName(),gameJSON);
+                var statement = db.setDB("DELETE FROM %DB_NAME%.gameData WHERE gameID = ?");
+                db.executeUpdate(statement, gameData.gameID());
+                var s2 = db.setDB("INSERT INTO %DB_NAME%.gameData (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)");
+                var gameJSON = new Gson().toJson(newGame.game(), ChessGame.class);
+                db.executeUpdate(s2, newGame.gameID(), newGame.whiteUsername(), newGame.blackUsername(), newGame.gameName(),gameJSON);
             }
         }
     }
@@ -96,7 +96,7 @@ public class SQLGameDAO implements GameDAO{
     }
 
     public void clearGameData() throws DataAccessException {
-        var statement = databaseManager.setDB("TRUNCATE %DB_NAME%.gameData");
-        databaseManager.executeUpdate(statement);
+        var statement = db.setDB("TRUNCATE %DB_NAME%.gameData");
+        db.executeUpdate(statement);
     }
 }
