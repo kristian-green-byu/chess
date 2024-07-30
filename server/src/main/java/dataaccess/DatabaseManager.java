@@ -101,8 +101,8 @@ public class DatabaseManager {
             """
             CREATE TABLE IF NOT EXISTS  gameData (
               `gameID` int NOT NULL AUTO_INCREMENT,
-              `whiteUsername` varchar(256) NOT NULL,
-              `blackUsername` varchar(256) NOT NULL,
+              `whiteUsername` varchar(256),
+              `blackUsername` varchar(256),
               `gameName` varchar(256) NOT NULL,
               `game` text NOT NULL,
               PRIMARY KEY (`gameID`)
@@ -124,8 +124,7 @@ public class DatabaseManager {
                         case String s -> ps.setString(i + 1, s);
                         case Integer x -> ps.setInt(i + 1, x);
                         case null -> ps.setNull(i + 1, NULL);
-                        default -> {
-                        }
+                        default -> {}
                     }
                 }
                 ps.executeUpdate();
