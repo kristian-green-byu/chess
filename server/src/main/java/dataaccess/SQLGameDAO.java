@@ -2,7 +2,6 @@ package dataaccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import model.AuthData;
 import model.GameData;
 
 import java.sql.ResultSet;
@@ -58,6 +57,9 @@ public class SQLGameDAO implements GameDAO{
     }
 
     public GameData getGame(int gameID) throws DataAccessException {
+        if (gameID < 0){
+            throw new DataAccessException("unauthorized");
+        }
         Collection<GameData> games = getGameDataCollection();
         for (GameData gameData : games) {
             if (gameData.gameID() == gameID) {
@@ -67,11 +69,30 @@ public class SQLGameDAO implements GameDAO{
         return null;
     }
 
-    public void updateGame(String name, ChessGame.TeamColor playerColor, GameData gameData){
+    public void updateGame(String name, ChessGame.TeamColor playerColor, GameData gameData) throws DataAccessException {
+        if(name == null || gameData == null || playerColor == null){
+            throw new DataAccessException("unauthorized");
+        }
+        Collection<GameData> games = getGameDataCollection();
+        GameData newGameData;
+        if (playerColor == ChessGame.TeamColor.WHITE) {
+            newGameData = new GameData(gameData.gameID(), name, gameData.blackUsername(), gameData.gameName(), gameData.game());
+        } else {
+            newGameData = new GameData(gameData.gameID(), gameData.whiteUsername(), name, gameData.gameName(), gameData.game());
+        }
+        for (GameData game : games) {
+            if(game.gameID() == gameData.gameID()) {
+                var statement = databaseManager.setDB("DELETE FROM %DB_NAME%.gameData WHERE gameID = ?");
+                databaseManager.executeUpdate(statement, gameData.gameID());
+                var statement2 = databaseManager.setDB("INSERT INTO %DB_NAME%.gameData (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)");
+                var gameJSON = new Gson().toJson(newGameData.game(), ChessGame.class);
+                databaseManager.executeUpdate(statement2, newGameData.gameID(), newGameData.whiteUsername(), newGameData.blackUsername(), newGameData.gameName(),gameJSON);
+            }
+        }
     }
 
-    public Collection<GameData> listGames(){
-        return null;
+    public Collection<GameData> listGames() throws DataAccessException {
+        return getGameDataCollection();
     }
 
     public void clearGameData() throws DataAccessException {
