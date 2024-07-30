@@ -18,12 +18,18 @@ public class Server {
     private final ClearService clearService;
 
     public Server() {
-        AuthDAO authDAO = new MemoryAuthDAO();
-        UserDAO userDAO = new MemoryUserDAO();
-        GameDAO gameDAO = new MemoryGameDAO();
-        gameService = new GameService(gameDAO, authDAO);
-        userService = new UserService(authDAO, userDAO);
-        clearService = new ClearService(authDAO, userDAO, gameDAO);
+        try{
+            AuthDAO authDAO = new SQLAuthDAO();
+            UserDAO userDAO = new SQLUserDAO();
+            GameDAO gameDAO = new SQLGameDAO();
+            gameService = new GameService(gameDAO, authDAO);
+            userService = new UserService(authDAO, userDAO);
+            clearService = new ClearService(authDAO, userDAO, gameDAO);
+        } catch(DataAccessException e){
+            throw new RuntimeException(e);
+        }
+
+
     }
 
     public int run(int desiredPort) {

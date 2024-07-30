@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import requests.LoginRequest;
@@ -11,9 +12,18 @@ import responses.LogoutResponse;
 import responses.RegisterResponse;
 
 public class UserServiceTests {
-    final AuthDAO authDAO = new MemoryAuthDAO();
-    final UserDAO userDAO = new MemoryUserDAO();
+    final AuthDAO authDAO = new SQLAuthDAO();
+    final UserDAO userDAO = new SQLUserDAO();
     final UserService userService = new UserService(authDAO, userDAO);
+
+    public UserServiceTests() throws DataAccessException {
+    }
+
+    @AfterEach
+    public void clearDAO() throws DataAccessException {
+        userDAO.clearUserData();
+        authDAO.clearAuthData();
+    }
 
     @Test
     public void registerSuccess() throws DataAccessException {
