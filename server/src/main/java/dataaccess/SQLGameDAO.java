@@ -39,7 +39,7 @@ public class SQLGameDAO implements GameDAO{
         return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
     }
 
-    private Collection<GameData> getGameDataCollection() throws DataAccessException {
+    private Collection<GameData> getGames() throws DataAccessException {
         Collection<GameData> games = new ArrayList<>();
         try (var conn = DatabaseManager.getConnection()) {
             var statement = db.setDB("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM %DB_NAME%.gameData");
@@ -60,7 +60,7 @@ public class SQLGameDAO implements GameDAO{
         if (gameID < 0){
             throw new DataAccessException("unauthorized");
         }
-        Collection<GameData> games = getGameDataCollection();
+        Collection<GameData> games = getGames();
         for (GameData gameData : games) {
             if (gameData.gameID() == gameID) {
                 return gameData;
@@ -73,7 +73,7 @@ public class SQLGameDAO implements GameDAO{
         if(name == null || gameData == null || playerColor == null){
             throw new DataAccessException("unauthorized");
         }
-        Collection<GameData> games = getGameDataCollection();
+        Collection<GameData> games = getGames();
         GameData newGame;
         if (playerColor == ChessGame.TeamColor.WHITE) {
             newGame = new GameData(gameData.gameID(), name, gameData.blackUsername(), gameData.gameName(), gameData.game());
@@ -92,7 +92,7 @@ public class SQLGameDAO implements GameDAO{
     }
 
     public Collection<GameData> listGames() throws DataAccessException {
-        return getGameDataCollection();
+        return getGames();
     }
 
     public void clearGameData() throws DataAccessException {
