@@ -7,11 +7,18 @@ public class ChessClient {
         this.server = new ServerFacade(serverUrl);
     }
 
+    public String eval(String line){
+        return line;
+    }
+
     public String help() {
         return """
-                - list
-                - delete <pet id>
-                - add <name> <CAT|DOG|FROG|FISH> [<friend name>]*
+                - register <username> <password> <email>
+                - login <username> <password>
+                - logout
+                - listGames
+                - createGame <gameName>
+                - joinGame <WHITE|BLACK> <gameID>
                 - clear
                 - quit
                 """;
