@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import dataaccess.DataAccessException;
 import requests.*;
 
@@ -15,8 +16,9 @@ public class ServerFacade {
         this.serverUrl = url;
     }
 
-    public Object register(RegisterRequest register) throws DataAccessException {
+    public Object register(String username, String password, String email) throws DataAccessException {
         var path = "/user";
+        RegisterRequest register = new RegisterRequest(username, password, email);
         return this.makeRequest("POST", path, register, RegisterRequest.class);
     }
 
@@ -25,28 +27,33 @@ public class ServerFacade {
         return this.makeRequest("DELETE", path, null, null);
     }
 
-    public Object login(LoginRequest login) throws DataAccessException {
+    public Object login(String username, String password) throws DataAccessException {
         var path = "/session";
+        LoginRequest login = new LoginRequest(username, password);
         return this.makeRequest("POST", path, login, LoginRequest.class);
     }
 
-    public Object logout(LogoutRequest logout) throws DataAccessException {
+    public Object logout(String authToken) throws DataAccessException {
         var path = "/session";
+        LogoutRequest logout = new LogoutRequest(authToken);
         return this.makeRequest("DELETE", path, logout, LogoutRequest.class);
     }
 
-    public Object listGames(ListGamesRequest listGames) throws DataAccessException {
+    public Object listGames(String authToken) throws DataAccessException {
         var path = "/game";
+        ListGamesRequest listGames = new ListGamesRequest(authToken);
         return this.makeRequest("GET", path, listGames, ListGamesRequest.class);
     }
 
-    public Object createGame(CreateGameRequest createGame) throws DataAccessException {
+    public Object createGame(String authToken, String gameName) throws DataAccessException {
         var path = "/game";
+        CreateGameRequest createGame = new CreateGameRequest(authToken, gameName);
         return this.makeRequest("POST", path, createGame, CreateGameRequest.class);
     }
 
-    public Object joinGame(JoinGameRequest joinGame) throws DataAccessException {
+    public Object joinGame(String authToken, ChessGame.TeamColor playerColor, int gameID) throws DataAccessException {
         var path = "/game";
+        JoinGameRequest joinGame = new JoinGameRequest(authToken, playerColor, gameID);
         return this.makeRequest("PUT", path, joinGame, JoinGameRequest.class);
     }
 
