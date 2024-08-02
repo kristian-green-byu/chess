@@ -8,7 +8,6 @@ import java.net.*;
 import com.google.gson.Gson;
 import java.io.*;
 
-
 public class ServerFacade {
     private final String serverUrl;
 
@@ -33,27 +32,25 @@ public class ServerFacade {
         return this.makeRequest("POST", path, login, LoginRequest.class);
     }
 
-    public Object logout(String authToken) throws DataAccessException {
+    public Object logout() throws DataAccessException {
         var path = "/session";
-        LogoutRequest logout = new LogoutRequest(authToken);
-        return this.makeRequest("DELETE", path, logout, LogoutRequest.class);
+        return this.makeRequest("DELETE", path, null, null);
     }
 
-    public Object listGames(String authToken) throws DataAccessException {
+    public ChessGame[] listGames() throws DataAccessException {
         var path = "/game";
-        ListGamesRequest listGames = new ListGamesRequest(authToken);
-        return this.makeRequest("GET", path, listGames, ListGamesRequest.class);
+        return this.makeRequest("GET", path, null, null);
     }
 
-    public Object createGame(String authToken, String gameName) throws DataAccessException {
+    public Object createGame(String gameName) throws DataAccessException {
         var path = "/game";
-        CreateGameRequest createGame = new CreateGameRequest(authToken, gameName);
+        CreateGameRequest createGame = new CreateGameRequest(null,gameName);
         return this.makeRequest("POST", path, createGame, CreateGameRequest.class);
     }
 
-    public Object joinGame(String authToken, ChessGame.TeamColor playerColor, int gameID) throws DataAccessException {
+    public Object joinGame(ChessGame.TeamColor playerColor, int gameID) throws DataAccessException {
         var path = "/game";
-        JoinGameRequest joinGame = new JoinGameRequest(authToken, playerColor, gameID);
+        JoinGameRequest joinGame = new JoinGameRequest(null, playerColor, gameID);
         return this.makeRequest("PUT", path, joinGame, JoinGameRequest.class);
     }
 

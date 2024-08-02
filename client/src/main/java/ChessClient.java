@@ -1,7 +1,10 @@
+import chess.ChessGame;
+import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import server.ServerFacade;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class ChessClient {
     private final ServerFacade server;
@@ -36,31 +39,79 @@ public class ChessClient {
     }
 
     public String register(String... params) throws DataAccessException {
-        return params[0];
+        try{
+            if(params.length == 3){
+                var username = params[0];
+                var password = params[1];
+                var email = params[2];
+                server.register(username, password, email);
+            }
+        } catch (Exception ignore){
+        }
+        throw new DataAccessException("Expected: <username> <password> <email>");
     }
 
     public String login(String... params) throws DataAccessException {
-        return params[0];
+        try{
+            if(params.length == 2){
+                var username = params[0];
+                var password = params[1];
+                server.login(username, password);
+            }
+        } catch (Exception ignore){
+        }
+        throw new DataAccessException("Expected: <username> <password>");
     }
 
     public String logout() throws DataAccessException {
-        return "placeholder";
+        server.logout();
+        return "User logged out.";
     }
 
     public String listGames() throws DataAccessException {
-        return "placeholder";
+        var games = server.listGames();
+        var result = new StringBuilder();
+        var gson = new Gson();
+        for (var game : games) {
+            result.append(gson.toJson(game)).append('\n');
+        }
+        return result.toString();
     }
 
     public String createGame(String... params) throws DataAccessException {
-        return "placeholder";
+        try{
+            if(params.length == 1){
+                var gameName = params[0];
+                server.createGame(gameName);
+            }
+        } catch (Exception ignore){
+        }
+        throw new DataAccessException("Expected: <gameName>");
     }
 
     public String joinGame(String... params) throws DataAccessException {
-        return "placeholder";
+        try{
+            if(params.length == 2){
+                var teamColorParam = params[0];
+                ChessGame.TeamColor teamColor = null;
+                if(Objects.equals(teamColorParam, "WHITE")){
+                    teamColor = ChessGame.TeamColor.WHITE;
+                }
+                else if(Objects.equals(teamColorParam, "BLACK")){
+                    teamColor = ChessGame.TeamColor.BLACK;
+                }
+                var gameID  = params[1];
+
+                server.joinGame(teamColor, Integer.parseInt(gameID));
+            }
+        } catch (Exception ignore){
+        }
+        throw new DataAccessException("Expected: <WHITE|BLACK> <gameID>");
     }
 
     public String clear() throws DataAccessException {
-        return "placeholder";
+        server.clearApplication();
+        return "Cleared everything";
     }
 
     public String help() {
