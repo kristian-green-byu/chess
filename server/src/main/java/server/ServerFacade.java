@@ -6,6 +6,7 @@ import requests.*;
 
 import java.net.*;
 import com.google.gson.Gson;
+import responses.LoginResponse;
 import responses.RegisterResponse;
 
 import java.io.*;
@@ -28,10 +29,10 @@ public class ServerFacade {
         return this.makeRequest("DELETE", path, null, null);
     }
 
-    public Object login(String username, String password) throws DataAccessException {
+    public LoginResponse login(String username, String password) throws DataAccessException {
         var path = "/session";
         LoginRequest login = new LoginRequest(username, password);
-        return this.makeRequest("POST", path, login, LoginRequest.class);
+        return this.makeRequest("POST", path, login, LoginResponse.class);
     }
 
     public Object logout() throws DataAccessException {
