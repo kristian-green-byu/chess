@@ -8,6 +8,7 @@ import java.util.Objects;
 
 public class ChessClient {
     private final ServerFacade server;
+    private static String authToken;
 
     public ChessClient(String serverUrl) {
         this.server = new ServerFacade(serverUrl);

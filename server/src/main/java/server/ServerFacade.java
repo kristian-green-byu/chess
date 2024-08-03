@@ -6,6 +6,8 @@ import requests.*;
 
 import java.net.*;
 import com.google.gson.Gson;
+import responses.RegisterResponse;
+
 import java.io.*;
 
 public class ServerFacade {
@@ -15,10 +17,10 @@ public class ServerFacade {
         this.serverUrl = url;
     }
 
-    public Object register(String username, String password, String email) throws DataAccessException {
+    public RegisterResponse register(String username, String password, String email) throws DataAccessException {
         var path = "/user";
         RegisterRequest register = new RegisterRequest(username, password, email);
-        return this.makeRequest("POST", path, register, RegisterRequest.class);
+        return this.makeRequest("POST", path, register, RegisterResponse.class);
     }
 
     public Object clearApplication() throws DataAccessException {

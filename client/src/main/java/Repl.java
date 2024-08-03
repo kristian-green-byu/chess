@@ -1,18 +1,18 @@
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
-public class repl {
+public class Repl {
     private final ChessClient client;
 
-    public repl(String url) {
+    public Repl(String url) {
         this.client = new ChessClient(url);
     }
     public void run(){
-        System.out.println(WHITE_KING + " Welcome to CS240 Chess. Type help to receive a list of commands. "+BLACK_KING);
+        System.out.println("Welcome to CS240 Chess. Type help to receive a list of commands.");
+
+        Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equals("quit")){
-            Scanner scanner = new Scanner(System.in);
-            while (!result.equals("quit")) {
                 printPrompt();
                 String line = scanner.nextLine();
 
@@ -22,7 +22,6 @@ public class repl {
                 } catch (Throwable e) {
                     System.out.print(e.getMessage());
                 }
-            }
             System.out.println();
         }
     }
