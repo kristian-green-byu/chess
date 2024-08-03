@@ -35,4 +35,10 @@ public class ServerFacadeTests {
         assert registerResponse.authToken()!=null && Objects.equals(registerResponse.username(), "player1");
     }
 
+    @Test
+    public void registerTwiceFail() throws DataAccessException {
+        facade.register("player1", "password", "p1@email.com");
+        Assertions.assertThrows(DataAccessException.class, () ->facade.register("player1", "subir", "pronto@email.com"));
+    }
+
 }
