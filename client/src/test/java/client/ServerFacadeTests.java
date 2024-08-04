@@ -1,12 +1,16 @@
 package client;
 
+import chess.ChessGame;
 import dataaccess.DataAccessException;
+import model.GameData;
 import org.junit.jupiter.api.*;
+import responses.ListGamesResponse;
 import responses.LoginResponse;
 import responses.RegisterResponse;
 import server.Server;
 import server.ServerFacade;
 
+import java.util.Collection;
 import java.util.Objects;
 
 
@@ -73,8 +77,18 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void logoutNotLoggedIn() throws DataAccessException {
+    public void logoutNotLoggedIn() {
         Assertions.assertThrows(DataAccessException.class, () -> facade.logout("nada"));
+    }
+
+    @Test
+    public void listGamesSuccess() throws DataAccessException  {
+        RegisterResponse registerResponse = facade.register("robert", "mcdonald", "mcds@email.com");
+        facade.createGame(registerResponse.authToken(), "test");
+        facade.createGame(registerResponse.authToken(), "test2");
+        ListGamesResponse gameResponse = facade.listGames(registerResponse.authToken());
+        Collection<GameData> games = gameResponse.games();
+        Assertions.assertEquals(2, games.size());
     }
 
 }

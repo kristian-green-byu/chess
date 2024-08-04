@@ -6,6 +6,7 @@ import requests.*;
 
 import java.net.*;
 import com.google.gson.Gson;
+import responses.ListGamesResponse;
 import responses.LoginResponse;
 import responses.RegisterResponse;
 
@@ -41,9 +42,10 @@ public class ServerFacade {
         this.makeRequest("DELETE", path, logout, null, authToken);
     }
 
-    public ChessGame[] listGames(String authToken) throws DataAccessException {
+    public ListGamesResponse listGames(String authToken) throws DataAccessException {
         var path = "/game";
-        return this.makeRequest("GET", path, null, null, authToken);
+        ListGamesRequest listGames = new ListGamesRequest(authToken);
+        return this.makeRequest("GET", path, listGames, ListGamesResponse.class, authToken);
     }
 
     public Object createGame(String authToken, String gameName) throws DataAccessException {
@@ -83,6 +85,11 @@ public class ServerFacade {
             String reqData = new Gson().toJson(request);
             try (OutputStream reqBody = http.getOutputStream()) {
                 reqBody.write(reqData.getBytes());
+            }
+        }
+        else{
+            if(authToken !=null) {
+                http.addRequestProperty("Authorization", authToken);
             }
         }
     }

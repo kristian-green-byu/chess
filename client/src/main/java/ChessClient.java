@@ -74,7 +74,8 @@ public class ChessClient {
     }
 
     public String listGames(String authToken) throws DataAccessException {
-        var games = server.listGames(authToken);
+        var gameResponse = server.listGames(authToken);
+        var games = gameResponse.games();
         var result = new StringBuilder();
         var gson = new Gson();
         for (var game : games) {
