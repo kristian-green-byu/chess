@@ -6,6 +6,7 @@ import requests.*;
 
 import java.net.*;
 import com.google.gson.Gson;
+import responses.CreateGameResponse;
 import responses.ListGamesResponse;
 import responses.LoginResponse;
 import responses.RegisterResponse;
@@ -47,10 +48,10 @@ public class ServerFacade {
         return this.makeRequest("GET", path, null, ListGamesResponse.class, authToken);
     }
 
-    public Object createGame(String authToken, String gameName) throws DataAccessException {
+    public CreateGameResponse createGame(String authToken, String gameName) throws DataAccessException {
         var path = "/game";
         CreateGameRequest createGame = new CreateGameRequest(null,gameName);
-        return this.makeRequest("POST", path, createGame, CreateGameRequest.class, authToken);
+        return this.makeRequest("POST", path, createGame, CreateGameResponse.class, authToken);
     }
 
     public void joinGame(String authToken, ChessGame.TeamColor playerColor, int gameID) throws DataAccessException {

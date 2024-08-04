@@ -4,6 +4,7 @@ import chess.ChessGame;
 import dataaccess.DataAccessException;
 import model.GameData;
 import org.junit.jupiter.api.*;
+import responses.CreateGameResponse;
 import responses.ListGamesResponse;
 import responses.LoginResponse;
 import responses.RegisterResponse;
@@ -102,6 +103,22 @@ public class ServerFacadeTests {
         facade.createGame(registerResponse.authToken(), "test2");
         facade.logout(registerResponse.authToken());
         Assertions.assertThrows(DataAccessException.class, () -> facade.listGames(registerResponse.authToken()));
+    }
+
+    @Test
+    public void joinGameSuccess() throws DataAccessException {
+        RegisterResponse registerResponse = facade.register("robert", "mcdonald", "mcds@email.com");
+        CreateGameResponse response = facade.createGame(registerResponse.authToken(), "test");
+        facade.joinGame(registerResponse.authToken(), ChessGame.TeamColor.WHITE, response.gameID());
+        ListGamesResponse listGamesResponse = facade.listGames(registerResponse.authToken());
+        boolean bobFound = false;
+        for (GameData gameData : listGamesResponse.games()) {
+            if (Objects.equals(gameData.whiteUsername(), "robert")) {
+                bobFound = true;
+                break;
+            }
+        }
+        Assertions.assertTrue(bobFound);
     }
 
 }
