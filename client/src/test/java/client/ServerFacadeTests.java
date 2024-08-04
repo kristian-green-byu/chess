@@ -121,4 +121,12 @@ public class ServerFacadeTests {
         Assertions.assertTrue(bobFound);
     }
 
+    @Test
+    public void joinGameNotLoggedIn() throws DataAccessException {
+        RegisterResponse registerResponse = facade.register("robert", "mcdonald", "mcds@email.com");
+        CreateGameResponse response = facade.createGame(registerResponse.authToken(), "test");
+        facade.logout(registerResponse.authToken());
+        Assertions.assertThrows(DataAccessException.class, () -> facade.joinGame(registerResponse.authToken(), ChessGame.TeamColor.WHITE, response.gameID()));
+    }
+
 }
