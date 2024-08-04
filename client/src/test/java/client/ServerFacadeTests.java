@@ -72,4 +72,9 @@ public class ServerFacadeTests {
         facade.logout(registerResponse.authToken());
     }
 
+    @Test
+    public void logoutNotLoggedIn() throws DataAccessException {
+        Assertions.assertThrows(DataAccessException.class, () -> facade.logout("nada"));
+    }
+
 }
