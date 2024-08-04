@@ -1,6 +1,8 @@
 import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
+import responses.LoginResponse;
+import responses.RegisterResponse;
 import server.ServerFacade;
 
 import java.util.Arrays;
@@ -24,8 +26,8 @@ public class ChessClient {
                 result = switch (cmd) {
                     case "register" -> register(params);
                     case "login" -> login(params);
-                    case "logout" -> logout();
-                    case "listGames" -> listGames();
+                    case "logout" -> logout(authToken);
+                    case "listGames" -> listGames(authToken);
                     case "createGame" -> createGame(params);
                     case "joinGame" -> joinGame(params);
                     case "clear" -> clear();
@@ -45,7 +47,8 @@ public class ChessClient {
                 var username = params[0];
                 var password = params[1];
                 var email = params[2];
-                server.register(username, password, email);
+                RegisterResponse registerResponse = server.register(username, password, email);
+                authToken = registerResponse.authToken();
             }
         } catch (Exception ignore){
         }
@@ -57,20 +60,21 @@ public class ChessClient {
             if(params.length == 2){
                 var username = params[0];
                 var password = params[1];
-                server.login(username, password);
+                LoginResponse loginResponse = server.login(username, password);
+                authToken = loginResponse.authToken();
             }
         } catch (Exception ignore){
         }
         throw new DataAccessException("Expected: <username> <password>");
     }
 
-    public String logout() throws DataAccessException {
-        server.logout();
+    public String logout(String authToken) throws DataAccessException {
+        server.logout(authToken);
         return "User logged out.";
     }
 
-    public String listGames() throws DataAccessException {
-        var games = server.listGames();
+    public String listGames(String authToken) throws DataAccessException {
+        var games = server.listGames(authToken);
         var result = new StringBuilder();
         var gson = new Gson();
         for (var game : games) {
@@ -83,7 +87,7 @@ public class ChessClient {
         try{
             if(params.length == 1){
                 var gameName = params[0];
-                server.createGame(gameName);
+                server.createGame(authToken, gameName);
             }
         } catch (Exception ignore){
         }
@@ -103,7 +107,7 @@ public class ChessClient {
                 }
                 var gameID  = params[1];
 
-                server.joinGame(teamColor, Integer.parseInt(gameID));
+                server.joinGame(authToken, teamColor, Integer.parseInt(gameID));
             }
         } catch (Exception ignore){
         }

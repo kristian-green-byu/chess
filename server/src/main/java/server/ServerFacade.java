@@ -21,50 +21,51 @@ public class ServerFacade {
     public RegisterResponse register(String username, String password, String email) throws DataAccessException {
         var path = "/user";
         RegisterRequest register = new RegisterRequest(username, password, email);
-        return this.makeRequest("POST", path, register, RegisterResponse.class);
+        return this.makeRequest("POST", path, register, RegisterResponse.class, null);
     }
 
-    public Object clearApplication() throws DataAccessException {
+    public void clearApplication() throws DataAccessException {
         var path = "/db";
-        return this.makeRequest("DELETE", path, null, null);
+        this.makeRequest("DELETE", path, null, null, null);
     }
 
     public LoginResponse login(String username, String password) throws DataAccessException {
         var path = "/session";
         LoginRequest login = new LoginRequest(username, password);
-        return this.makeRequest("POST", path, login, LoginResponse.class);
+        return this.makeRequest("POST", path, login, LoginResponse.class, null);
     }
 
-    public Object logout() throws DataAccessException {
+    public void logout(String authToken) throws DataAccessException {
         var path = "/session";
-        return this.makeRequest("DELETE", path, null, null);
+        LogoutRequest logout = new LogoutRequest(authToken);
+        this.makeRequest("DELETE", path, logout, null, authToken);
     }
 
-    public ChessGame[] listGames() throws DataAccessException {
+    public ChessGame[] listGames(String authToken) throws DataAccessException {
         var path = "/game";
-        return this.makeRequest("GET", path, null, null);
+        return this.makeRequest("GET", path, null, null, authToken);
     }
 
-    public Object createGame(String gameName) throws DataAccessException {
+    public Object createGame(String authToken, String gameName) throws DataAccessException {
         var path = "/game";
         CreateGameRequest createGame = new CreateGameRequest(null,gameName);
-        return this.makeRequest("POST", path, createGame, CreateGameRequest.class);
+        return this.makeRequest("POST", path, createGame, CreateGameRequest.class, authToken);
     }
 
-    public Object joinGame(ChessGame.TeamColor playerColor, int gameID) throws DataAccessException {
+    public void joinGame(String authToken, ChessGame.TeamColor playerColor, int gameID) throws DataAccessException {
         var path = "/game";
         JoinGameRequest joinGame = new JoinGameRequest(null, playerColor, gameID);
-        return this.makeRequest("PUT", path, joinGame, JoinGameRequest.class);
+        this.makeRequest("PUT", path, joinGame, JoinGameRequest.class, authToken);
     }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws DataAccessException {
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws DataAccessException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
 
-            writeBody(request, http);
+            writeBody(request, http, authToken);
             http.connect();
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
@@ -73,9 +74,12 @@ public class ServerFacade {
         }
     }
 
-    private static void writeBody(Object request, HttpURLConnection http) throws IOException {
+    private static void writeBody(Object request, HttpURLConnection http, String authToken) throws IOException {
         if (request != null) {
             http.addRequestProperty("Content-Type", "application/json");
+            if(authToken !=null) {
+                http.addRequestProperty("Authorization", authToken);
+            }
             String reqData = new Gson().toJson(request);
             try (OutputStream reqBody = http.getOutputStream()) {
                 reqBody.write(reqData.getBytes());

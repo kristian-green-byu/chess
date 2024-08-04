@@ -66,4 +66,10 @@ public class ServerFacadeTests {
         Assertions.assertThrows(DataAccessException.class, () -> facade.login("bob", "carlisle"));
     }
 
+    @Test
+    public void logoutSuccess() throws DataAccessException {
+        RegisterResponse registerResponse = facade.register("nada", "password", "ninguem@email.com");
+        facade.logout(registerResponse.authToken());
+    }
+
 }
