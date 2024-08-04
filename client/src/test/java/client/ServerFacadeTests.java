@@ -95,4 +95,13 @@ public class ServerFacadeTests {
         Assertions.assertEquals(2, games.size());
     }
 
+    @Test
+    public void listGamesNoAuth() throws DataAccessException {
+        RegisterResponse registerResponse = facade.register("Kelly", "Hansen", "khs@email.com");
+        facade.createGame(registerResponse.authToken(), "test");
+        facade.createGame(registerResponse.authToken(), "test2");
+        facade.logout(registerResponse.authToken());
+        Assertions.assertThrows(DataAccessException.class, () -> facade.listGames(registerResponse.authToken()));
+    }
+
 }
