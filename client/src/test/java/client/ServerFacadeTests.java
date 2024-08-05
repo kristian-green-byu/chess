@@ -1,7 +1,6 @@
 package client;
 
 import chess.ChessGame;
-import dataaccess.DataAccessException;
 import model.GameData;
 import org.junit.jupiter.api.*;
 import responses.CreateGameResponse;
@@ -11,6 +10,7 @@ import responses.RegisterResponse;
 import server.Server;
 import serverfacade.ServerFacade;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -29,7 +29,7 @@ public class ServerFacadeTests {
     }
 
     @AfterEach
-    void clearSQL() throws DataAccessException {
+    void clearSQL() throws IOException {
         facade.clearApplication();
     }
 
@@ -40,54 +40,54 @@ public class ServerFacadeTests {
 
 
     @Test
-    public void registerSuccess() throws DataAccessException {
+    public void registerSuccess() throws IOException {
         RegisterResponse registerResponse = facade.register("player1", "password", "p1@email.com");
         Assertions.assertTrue( registerResponse.authToken()!=null && Objects.equals(registerResponse.username(), "player1"));
     }
 
     @Test
-    public void registerTwiceFail() throws DataAccessException {
+    public void registerTwiceFail() throws IOException {
         facade.register("player1", "password", "p1@email.com");
-        Assertions.assertThrows(DataAccessException.class, () ->facade.register("player1", "subir", "pronto@email.com"));
+        Assertions.assertThrows(IOException.class, () ->facade.register("player1", "subir", "pronto@email.com"));
     }
 
     @Test
-    public void loginSuccess() throws DataAccessException {
+    public void loginSuccess() throws IOException {
         facade.register("nada", "password", "ninguem@email.com");
         LoginResponse loginResponse = facade.login("nada", "password");
         Assertions.assertTrue(loginResponse.authToken()!=null && Objects.equals(loginResponse.username(), "nada"));
     }
 
     @Test
-    public void loginBadPassword() throws DataAccessException {
+    public void loginBadPassword() throws IOException {
         facade.register("nada", "password", "ninguem@email.com");
-        Assertions.assertThrows(DataAccessException.class, () -> facade.login("nada", "mal"));
+        Assertions.assertThrows(IOException.class, () -> facade.login("nada", "mal"));
     }
 
     @Test
-    public void clear() throws DataAccessException {
+    public void clear() throws IOException {
         facade.register("nada", "password", "ninguem@email.com");
         facade.register("player1", "password", "p1@email.com");
         facade.register("bob", "carlisle", "bobc@email.com");
         facade.clearApplication();
-        Assertions.assertThrows(DataAccessException.class, () -> facade.login("nada", "password"));
-        Assertions.assertThrows(DataAccessException.class, () -> facade.login("player1", "password"));
-        Assertions.assertThrows(DataAccessException.class, () -> facade.login("bob", "carlisle"));
+        Assertions.assertThrows(IOException.class, () -> facade.login("nada", "password"));
+        Assertions.assertThrows(IOException.class, () -> facade.login("player1", "password"));
+        Assertions.assertThrows(IOException.class, () -> facade.login("bob", "carlisle"));
     }
 
     @Test
-    public void logoutSuccess() throws DataAccessException {
+    public void logoutSuccess() throws IOException {
         RegisterResponse registerResponse = facade.register("nada", "password", "ninguem@email.com");
         facade.logout(registerResponse.authToken());
     }
 
     @Test
     public void logoutNotLoggedIn() {
-        Assertions.assertThrows(DataAccessException.class, () -> facade.logout("nada"));
+        Assertions.assertThrows(IOException.class, () -> facade.logout("nada"));
     }
 
     @Test
-    public void listGamesSuccess() throws DataAccessException  {
+    public void listGamesSuccess() throws IOException  {
         RegisterResponse registerResponse = facade.register("robert", "mcdonald", "mcds@email.com");
         facade.createGame(registerResponse.authToken(), "test");
         facade.createGame(registerResponse.authToken(), "test2");
@@ -97,16 +97,16 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void listGamesNoAuth() throws DataAccessException {
+    public void listGamesNoAuth() throws IOException {
         RegisterResponse registerResponse = facade.register("Kelly", "Hansen", "khs@email.com");
         facade.createGame(registerResponse.authToken(), "test");
         facade.createGame(registerResponse.authToken(), "test2");
         facade.logout(registerResponse.authToken());
-        Assertions.assertThrows(DataAccessException.class, () -> facade.listGames(registerResponse.authToken()));
+        Assertions.assertThrows(IOException.class, () -> facade.listGames(registerResponse.authToken()));
     }
 
     @Test
-    public void joinGameSuccess() throws DataAccessException {
+    public void joinGameSuccess() throws IOException {
         RegisterResponse registerResponse = facade.register("robert", "mcdonald", "mcds@email.com");
         CreateGameResponse response = facade.createGame(registerResponse.authToken(), "test");
         facade.joinGame(registerResponse.authToken(), ChessGame.TeamColor.WHITE, response.gameID());
@@ -122,11 +122,11 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void joinGameNotLoggedIn() throws DataAccessException {
+    public void joinGameNotLoggedIn() throws IOException {
         RegisterResponse registerResponse = facade.register("robert", "mcdonald", "mcds@email.com");
         CreateGameResponse response = facade.createGame(registerResponse.authToken(), "test");
         facade.logout(registerResponse.authToken());
-        Assertions.assertThrows(DataAccessException.class, () -> facade.joinGame(registerResponse.authToken(), ChessGame.TeamColor.WHITE, response.gameID()));
+        Assertions.assertThrows(IOException.class, () -> facade.joinGame(registerResponse.authToken(), ChessGame.TeamColor.WHITE, response.gameID()));
     }
 
 }
