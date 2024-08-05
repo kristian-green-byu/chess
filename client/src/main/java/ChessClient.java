@@ -35,7 +35,6 @@ public class ChessClient {
                     case "list" -> listGames(authToken);
                     case "create" -> createGame(params);
                     case "join" -> joinGame(params);
-                    case "clear" -> clear();
                     case "quit" -> "quit";
                     case "help" -> help();
                     case "observe" -> observe(params);
@@ -230,12 +229,6 @@ public class ChessClient {
         } catch (NumberFormatException e) {
             return true;
         }
-    }
-
-    public String clear() throws IOException {
-        server.clearApplication();
-        postLogin = false;
-        return "Cleared everything";
     }
 
     public String help() {
