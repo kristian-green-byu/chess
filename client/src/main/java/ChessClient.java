@@ -58,9 +58,12 @@ public class ChessClient {
             else{
                 return "Expected: <username> <password> <email>";
             }
-        } catch (Exception ignore){
+        } catch (Exception e){
+            if(e.getMessage().equals("Request unsuccessful: 403")){
+                return "Request unsuccessful. Verify your inputs and try again";
+            }
+            return e.getMessage();
         }
-        throw new IOException("Registration failed. Verify your input and try again.");
     }
 
     public String login(String... params) throws IOException {
@@ -73,36 +76,49 @@ public class ChessClient {
                 postLogin = true;
                 return "You are now logged in as "+username+"\nType help to see new commands";
             }
-        } catch (Exception ignore){
+            else {
+                return "Expected: <username> <password>";
+            }
+        } catch (Exception e){
+            return e.getMessage();
         }
-        throw new IOException("Expected: <username> <password>");
     }
 
     public String logout(String authToken) throws IOException {
         if(!postLogin){
             return "You are not logged in";
         }
-        server.logout(authToken);
-        return "Logged out successful";
+        try{
+            server.logout(authToken);
+            return "Logged out successfully";
+        }
+        catch (Exception e){
+            return e.getMessage();
+        }
     }
 
     public String listGames(String authToken) throws IOException {
         if(!postLogin){
-            return "Log in first to see current games";
+            return "Login first to see current games";
         }
-        var gameResponse = server.listGames(authToken);
-        var games = gameResponse.games();
-        var result = new StringBuilder();
-        var gson = new Gson();
-        for (var game : games) {
-            result.append(gson.toJson(game)).append('\n');
+        try{
+            var gameResponse = server.listGames(authToken);
+            var games = gameResponse.games();
+            var result = new StringBuilder();
+            var gson = new Gson();
+            for (var game : games) {
+                result.append(gson.toJson(game)).append('\n');
+            }
+            return result.toString();
         }
-        return result.toString();
+        catch (Exception e){
+            return e.getMessage();
+        }
     }
 
     public String createGame(String... params) throws IOException {
         if(!postLogin){
-            return "Log in first to create a game";
+            return "Login first to create a game";
         }
         try{
             if(params.length == 1){
@@ -110,24 +126,30 @@ public class ChessClient {
                 server.createGame(authToken, gameName);
                 return "Created game successfully";
             }
-        } catch (Exception ignore){
+            else{
+                return "Expected: <gameName>";
+            }
+        } catch (Exception e){
+            return e.getMessage();
         }
-        throw new IOException("Expected: <gameName>");
     }
 
     public String joinGame(String... params) throws IOException {
         if(!postLogin){
-            return "Log in first to join a game";
+            return "Login first to join a game";
         }
         try{
             if(params.length == 2){
-                var teamColorParam = params[1];
+                var teamColorParam = params[0];
                 ChessGame.TeamColor teamColor = null;
-                if(Objects.equals(teamColorParam, "WHITE")){
+                if(Objects.equals(teamColorParam, "white")){
                     teamColor = ChessGame.TeamColor.WHITE;
                 }
-                else if(Objects.equals(teamColorParam, "BLACK")){
+                else if(Objects.equals(teamColorParam, "black")){
                     teamColor = ChessGame.TeamColor.BLACK;
+                }
+                else{
+                    return "please only write white for white and black for black";
                 }
                 var gameID  = params[1];
 
@@ -135,9 +157,12 @@ public class ChessClient {
 
                 return "Joined game successfully as "+teamColor;
             }
-        } catch (Exception ignore){
+            else{
+                return "Expected: <white|black> <gameID>";
+            }
+        } catch (Exception e){
+            return e.getMessage();
         }
-        throw new IOException("Expected: <WHITE|BLACK> <gameID>");
     }
 
     public String clear() throws IOException {
