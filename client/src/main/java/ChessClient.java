@@ -222,16 +222,20 @@ public class ChessClient {
         String boardString = board.toString();
         StringBuilder result = new StringBuilder();
         boolean alt = false;
+        result.append(SET_BG_COLOR_WHITE).append(SET_TEXT_COLOR_BLACK).append(EMPTY)
+                .append(" a  b  c  d  e  f  g  h ").append(EMPTY).append(RESET_BG_COLOR).append('\n');
         if(color == ChessGame.TeamColor.BLACK){
             StringBuilder reverseBoardString = new StringBuilder();
-            for(int i=0; i<boardString.length(); i++){
-                char ch= boardString.charAt(i);
-                reverseBoardString.insert(0, ch);
-            }
+            reverseBoardString.append(boardString);
+            reverseBoardString.reverse();
+            reverseBoardString.delete(0, 1);
+            reverseBoardString.append('\n');
             boardString = reverseBoardString.toString();
             alt = true;
         }
+        int colNum = 8;
         for (var line : boardString.split("\n")) {
+            result.append(SET_BG_COLOR_WHITE).append(SET_TEXT_COLOR_BLACK).append(' ').append(colNum).append(' ');
             for(var character : line.toCharArray()) {
                 if(character == '|'){
                     continue;
@@ -285,9 +289,13 @@ public class ChessClient {
                     result.append(SET_TEXT_COLOR_WHITE + WHITE_PAWN);
                 }
             }
+            result.append(SET_BG_COLOR_WHITE).append(SET_TEXT_COLOR_BLACK).append(' ').append(colNum).append(' ');
+            colNum--;
             result.append(RESET_BG_COLOR + '\n');
             alt = !alt;
         }
+        result.append(SET_BG_COLOR_WHITE).append(SET_TEXT_COLOR_BLACK).append(EMPTY)
+                .append(" a  b  c  d  e  f  g  h ").append(EMPTY).append(RESET_BG_COLOR).append('\n');
         return result.toString();
     }
     
