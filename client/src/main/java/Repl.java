@@ -4,8 +4,8 @@ import static ui.EscapeSequences.*;
 public class Repl {
     private final ChessClient client;
 
-    public Repl(String url) {
-        this.client = new ChessClient(url);
+    public Repl(int port) {
+        this.client = new ChessClient(port);
     }
     public void run(){
         System.out.println("Welcome to CS240 Chess. Type help to receive a list of commands.");

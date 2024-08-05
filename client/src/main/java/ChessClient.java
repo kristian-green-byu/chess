@@ -9,11 +9,13 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class ChessClient {
-    private final ServerFacade server;
+    private static ServerFacade server;
     private static String authToken;
+    private boolean postLogin;
 
-    public ChessClient(String serverUrl) {
-        this.server = new ServerFacade(serverUrl);
+    public ChessClient(int port) {
+        server = new ServerFacade("http://localhost:"+port);
+        postLogin = false;
     }
 
     public String eval(String line){
@@ -27,12 +29,12 @@ public class ChessClient {
                     case "register" -> register(params);
                     case "login" -> login(params);
                     case "logout" -> logout(authToken);
-                    case "listGames" -> listGames(authToken);
-                    case "createGame" -> createGame(params);
+                    case "list" -> listGames(authToken);
+                    case "create" -> createGame(params);
                     case "joinGame" -> joinGame(params);
                     case "clear" -> clear();
                     case "quit" -> "quit";
-                    default -> preLoginHelp();
+                    default -> help();
                 };
             }
         } catch (IOException e) {
@@ -44,11 +46,13 @@ public class ChessClient {
     public String register(String... params) throws IOException {
         try{
             if(params.length == 3){
-                var username = params[0];
-                var password = params[1];
-                var email = params[2];
+                String username = params[0];
+                String password = params[1];
+                String email = params[2];
                 RegisterResponse registerResponse = server.register(username, password, email);
                 authToken = registerResponse.authToken();
+                postLogin = true;
+                return "Registration successful. You are now logged in as "+username;
             }
         } catch (Exception ignore){
         }
@@ -118,6 +122,26 @@ public class ChessClient {
     public String clear() throws IOException {
         server.clearApplication();
         return "Cleared everything";
+    }
+
+    public String help() {
+        if(postLogin){
+            return postLoginHelp();
+        }
+        else {
+            return preLoginHelp();
+        }
+    }
+
+    public String postLoginHelp() {
+        return """
+                create <gameName> - create a new chess game
+                list - list active chess games
+                join - <WHITE|BLACK> <gameID> - join a chess game
+                logout - logout when finished
+                quit - close the chess client
+                help - receive a list of executable commands
+                """;
     }
 
     public String preLoginHelp() {
