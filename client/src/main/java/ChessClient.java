@@ -15,12 +15,10 @@ public class ChessClient {
     private static ServerFacade server;
     private static String authToken;
     private boolean postLogin;
-    private boolean inGame;
 
     public ChessClient(int port) {
         server = new ServerFacade("http://localhost:"+port);
         postLogin = false;
-        inGame = false;
     }
 
     public String eval(String line){
@@ -182,8 +180,9 @@ public class ChessClient {
                     return "Invalid game number. Type list to see possible game numbers";
                 }
                 server.joinGame(authToken, teamColor, gameID);
-                inGame = true;
-                return "Joined game successfully as "+teamColor+"\n"+ displayBoard(gameData);
+                return "Joined game successfully as "+teamColor+"\n"+
+                        displayBoard(gameData, ChessGame.TeamColor.WHITE)+
+                        displayBoard(gameData, ChessGame.TeamColor.BLACK);
             }
             else{
                 return "Expected: <white|black> <gameNumber>";
@@ -217,12 +216,21 @@ public class ChessClient {
         }
     }
     
-    private String displayBoard(GameData gameData){
+    private String displayBoard(GameData gameData, ChessGame.TeamColor color){
         ChessGame game = gameData.game();
         ChessBoard board = game.getBoard();
         String boardString = board.toString();
         StringBuilder result = new StringBuilder();
         boolean alt = false;
+        if(color == ChessGame.TeamColor.BLACK){
+            StringBuilder reverseBoardString = new StringBuilder();
+            for(int i=0; i<boardString.length(); i++){
+                char ch= boardString.charAt(i);
+                reverseBoardString.insert(0, ch);
+            }
+            boardString = reverseBoardString.toString();
+            alt = true;
+        }
         for (var line : boardString.split("\n")) {
             for(var character : line.toCharArray()) {
                 if(character == '|'){
