@@ -1,10 +1,12 @@
 import chess.ChessGame;
+import model.GameData;
 import responses.LoginResponse;
 import responses.RegisterResponse;
 import serverfacade.ServerFacade;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Objects;
 
 public class ChessClient {
@@ -151,16 +153,27 @@ public class ChessClient {
                     teamColor = ChessGame.TeamColor.BLACK;
                 }
                 else{
-                    return "please only write white for white and black for black";
+                    return "please only write white to join " +
+                            "as white and black to join as black";
                 }
-                var gameID  = params[1];
-
-                server.joinGame(authToken, teamColor, Integer.parseInt(gameID));
+                int desiredID  = Integer.parseInt(params[1]);
+                var gameResponse = server.listGames(authToken);
+                var games = gameResponse.games();
+                int currentID = 1;
+                int gameID = 0;
+                for (var game : games) {
+                    if(desiredID == currentID){
+                        gameID = game.gameID();
+                        break;
+                    }
+                    currentID++;
+                }
+                server.joinGame(authToken, teamColor, gameID);
 
                 return "Joined game successfully as "+teamColor;
             }
             else{
-                return "Expected: <white|black> <gameID>";
+                return "Expected: <white|black> <gameNumber>";
             }
         } catch (Exception e){
             return e.getMessage();
@@ -169,6 +182,7 @@ public class ChessClient {
 
     public String clear() throws IOException {
         server.clearApplication();
+        postLogin = false;
         return "Cleared everything";
     }
 
@@ -185,7 +199,7 @@ public class ChessClient {
         return """
                 create <gameName> - create a new chess game
                 list - list active chess games
-                join - <WHITE|BLACK> <gameID> - join a chess game
+                join - <WHITE|BLACK> <gameNumber> - join a chess game; list the games to find game number
                 logout - logout when finished
                 quit - close the chess client
                 help - receive a list of executable commands
