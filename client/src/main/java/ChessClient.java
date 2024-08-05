@@ -38,6 +38,7 @@ public class ChessClient {
                     case "clear" -> clear();
                     case "quit" -> "quit";
                     case "help" -> help();
+                    case "observe" -> observe(params);
                     default -> "Invalid Command. Type help to see valid commands";
                 };
             }
@@ -163,23 +164,11 @@ public class ChessClient {
                     return "You did not input a valid integer for <gameNumber>. Please try again";
                 }
                 int desiredID  = Integer.parseInt(params[1]);
-                var gameResponse = server.listGames(authToken);
-                var games = gameResponse.games();
-                int currentID = 1;
-                int gameID = 0;
-                GameData gameData = null;
-                for (var game : games) {
-                    if(desiredID == currentID){
-                        gameID = game.gameID();
-                        gameData = game;
-                        break;
-                    }
-                    currentID++;
-                }
-                if(gameID == 0){
+                GameData gameData = getGameData(desiredID);
+                if(gameData == null){
                     return "Invalid game number. Type list to see possible game numbers";
                 }
-                server.joinGame(authToken, teamColor, gameID);
+                server.joinGame(authToken, teamColor, gameData.gameID());
                 return "Joined game successfully as "+teamColor+"\n\n"+
                         displayBoard(gameData, ChessGame.TeamColor.WHITE)+
                         SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLACK+
@@ -209,7 +198,7 @@ public class ChessClient {
         return "Cleared everything";
     }
 
-    private String help() {
+    public String help() {
         if(postLogin){
             return postLoginHelp();
         }
@@ -217,7 +206,55 @@ public class ChessClient {
             return preLoginHelp();
         }
     }
-    
+
+    public String observe(String... params) throws IOException {
+        if(!postLogin){
+            return "Login first to observe a game";
+        }
+        try{
+            if(params.length == 1){
+                if(!isNumeric(params[0])){
+                    return "You did not input a valid integer for <gameNumber>. Please try again";
+                }
+                int desiredID  = Integer.parseInt(params[0]);
+                GameData gameData = getGameData(desiredID);
+                if (gameData == null){
+                    return "Invalid game number. Type list to see possible game numbers";
+                }
+                return "Observing game "+desiredID+"\n\n"+
+                        displayBoard(gameData, ChessGame.TeamColor.WHITE)+
+                        SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLACK+
+                        "                              "+ RESET_BG_COLOR + '\n'+
+                        displayBoard(gameData, ChessGame.TeamColor.BLACK);
+            }
+            else{
+                return "Expected: <gameNumber>";
+            }
+        } catch (Exception e){
+            return e.getMessage();
+        }
+    }
+
+    private static GameData getGameData(int desiredID) throws IOException {
+        var gameResponse = server.listGames(authToken);
+        var games = gameResponse.games();
+        int currentID = 1;
+        int gameID = 0;
+        GameData gameData = null;
+        for (var game : games) {
+            if(desiredID == currentID){
+                gameID = game.gameID();
+                gameData = game;
+                break;
+            }
+            currentID++;
+        }
+        if(gameID == 0){
+            return null;
+        }
+        return gameData;
+    }
+
     private String displayBoard(GameData gameData, ChessGame.TeamColor color){
         ChessGame game = gameData.game();
         ChessBoard board = game.getBoard();
@@ -313,7 +350,8 @@ public class ChessClient {
         return """
                 create <gameName> - create a new chess game
                 list - list active chess games
-                join - <WHITE|BLACK> <gameNumber> - join a chess game; list the games to find game number
+                join <WHITE|BLACK> <gameNumber> - join a chess game; list the games to find game number
+                observe <gameNumber> - observe a chess game without playing; list the games to find game number
                 logout - logout when finished
                 quit - close the chess client
                 help - receive a list of executable commands
