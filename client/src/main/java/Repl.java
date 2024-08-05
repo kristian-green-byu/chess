@@ -26,6 +26,6 @@ public class Repl {
         }
     }
     private void printPrompt() {
-        System.out.print("\n" + RESET_TEXT_BOLD_FAINT + ">>> " + SET_TEXT_COLOR_GREEN);
+        System.out.print(SET_TEXT_BLINKING + RESET_TEXT_COLOR + "\n" + RESET_TEXT_BOLD_FAINT + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 }

@@ -31,10 +31,11 @@ public class ChessClient {
                     case "logout" -> logout(authToken);
                     case "list" -> listGames(authToken);
                     case "create" -> createGame(params);
-                    case "joinGame" -> joinGame(params);
+                    case "join" -> joinGame(params);
                     case "clear" -> clear();
                     case "quit" -> "quit";
-                    default -> help();
+                    case "help" -> help();
+                    default -> "Invalid Command. Type help to see valid commands";
                 };
             }
         } catch (IOException e) {
@@ -52,11 +53,14 @@ public class ChessClient {
                 RegisterResponse registerResponse = server.register(username, password, email);
                 authToken = registerResponse.authToken();
                 postLogin = true;
-                return "Registration successful. You are now logged in as "+username;
+                return "Registration successful. You are now logged in as "+username+"\nType help to see new commands";
+            }
+            else{
+                return "Expected: <username> <password> <email>";
             }
         } catch (Exception ignore){
         }
-        throw new IOException("Expected: <username> <password> <email>");
+        throw new IOException("Registration failed. Verify your input and try again.");
     }
 
     public String login(String... params) throws IOException {
@@ -66,6 +70,8 @@ public class ChessClient {
                 var password = params[1];
                 LoginResponse loginResponse = server.login(username, password);
                 authToken = loginResponse.authToken();
+                postLogin = true;
+                return "You are now logged in as "+username+"\nType help to see new commands";
             }
         } catch (Exception ignore){
         }
@@ -73,11 +79,17 @@ public class ChessClient {
     }
 
     public String logout(String authToken) throws IOException {
+        if(!postLogin){
+            return "You are not logged in";
+        }
         server.logout(authToken);
-        return "User logged out.";
+        return "Logged out successful";
     }
 
     public String listGames(String authToken) throws IOException {
+        if(!postLogin){
+            return "Log in first to see current games";
+        }
         var gameResponse = server.listGames(authToken);
         var games = gameResponse.games();
         var result = new StringBuilder();
@@ -89,10 +101,14 @@ public class ChessClient {
     }
 
     public String createGame(String... params) throws IOException {
+        if(!postLogin){
+            return "Log in first to create a game";
+        }
         try{
             if(params.length == 1){
                 var gameName = params[0];
                 server.createGame(authToken, gameName);
+                return "Created game successfully";
             }
         } catch (Exception ignore){
         }
@@ -100,9 +116,12 @@ public class ChessClient {
     }
 
     public String joinGame(String... params) throws IOException {
+        if(!postLogin){
+            return "Log in first to join a game";
+        }
         try{
             if(params.length == 2){
-                var teamColorParam = params[0];
+                var teamColorParam = params[1];
                 ChessGame.TeamColor teamColor = null;
                 if(Objects.equals(teamColorParam, "WHITE")){
                     teamColor = ChessGame.TeamColor.WHITE;
@@ -113,6 +132,8 @@ public class ChessClient {
                 var gameID  = params[1];
 
                 server.joinGame(authToken, teamColor, Integer.parseInt(gameID));
+
+                return "Joined game successfully as "+teamColor;
             }
         } catch (Exception ignore){
         }
