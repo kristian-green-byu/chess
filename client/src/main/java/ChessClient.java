@@ -180,8 +180,10 @@ public class ChessClient {
                     return "Invalid game number. Type list to see possible game numbers";
                 }
                 server.joinGame(authToken, teamColor, gameID);
-                return "Joined game successfully as "+teamColor+"\n"+
+                return "Joined game successfully as "+teamColor+"\n\n"+
                         displayBoard(gameData, ChessGame.TeamColor.WHITE)+
+                        SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLACK+
+                        "                              "+ RESET_BG_COLOR + '\n'+
                         displayBoard(gameData, ChessGame.TeamColor.BLACK);
             }
             else{
@@ -222,8 +224,8 @@ public class ChessClient {
         String boardString = board.toString();
         StringBuilder result = new StringBuilder();
         boolean alt = false;
-        result.append(SET_BG_COLOR_WHITE).append(SET_TEXT_COLOR_BLACK).append(EMPTY)
-                .append(" a  b  c  d  e  f  g  h ").append(EMPTY).append(RESET_BG_COLOR).append('\n');
+        String topBorder = SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY +
+                " a  b  c  d  e  f  g  h " + EMPTY + RESET_BG_COLOR + '\n';
         if(color == ChessGame.TeamColor.BLACK){
             StringBuilder reverseBoardString = new StringBuilder();
             reverseBoardString.append(boardString);
@@ -232,7 +234,10 @@ public class ChessClient {
             reverseBoardString.append('\n');
             boardString = reverseBoardString.toString();
             alt = true;
+            topBorder = SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY +
+                    " h  g  f  e  d  c  b  a " + EMPTY + RESET_BG_COLOR + '\n';
         }
+        result.append(topBorder);
         int colNum = 8;
         for (var line : boardString.split("\n")) {
             result.append(SET_BG_COLOR_WHITE).append(SET_TEXT_COLOR_BLACK).append(' ').append(colNum).append(' ');
@@ -294,8 +299,7 @@ public class ChessClient {
             result.append(RESET_BG_COLOR + '\n');
             alt = !alt;
         }
-        result.append(SET_BG_COLOR_WHITE).append(SET_TEXT_COLOR_BLACK).append(EMPTY)
-                .append(" a  b  c  d  e  f  g  h ").append(EMPTY).append(RESET_BG_COLOR).append('\n');
+        result.append(topBorder);
         return result.toString();
     }
     
