@@ -1,7 +1,6 @@
-package server;
+package serverfacade;
 
 import chess.ChessGame;
-import dataaccess.DataAccessException;
 import requests.*;
 
 import java.net.*;
@@ -20,47 +19,47 @@ public class ServerFacade {
         this.serverUrl = url;
     }
 
-    public RegisterResponse register(String username, String password, String email) throws DataAccessException {
+    public RegisterResponse register(String username, String password, String email) throws IOException {
         var path = "/user";
         RegisterRequest register = new RegisterRequest(username, password, email);
         return this.makeRequest("POST", path, register, RegisterResponse.class, null);
     }
 
-    public void clearApplication() throws DataAccessException {
+    public void clearApplication() throws IOException {
         var path = "/db";
         this.makeRequest("DELETE", path, null, null, null);
     }
 
-    public LoginResponse login(String username, String password) throws DataAccessException {
+    public LoginResponse login(String username, String password) throws IOException {
         var path = "/session";
         LoginRequest login = new LoginRequest(username, password);
         return this.makeRequest("POST", path, login, LoginResponse.class, null);
     }
 
-    public void logout(String authToken) throws DataAccessException {
+    public void logout(String authToken) throws IOException {
         var path = "/session";
         LogoutRequest logout = new LogoutRequest(authToken);
         this.makeRequest("DELETE", path, logout, null, authToken);
     }
 
-    public ListGamesResponse listGames(String authToken) throws DataAccessException {
+    public ListGamesResponse listGames(String authToken) throws IOException {
         var path = "/game";
         return this.makeRequest("GET", path, null, ListGamesResponse.class, authToken);
     }
 
-    public CreateGameResponse createGame(String authToken, String gameName) throws DataAccessException {
+    public CreateGameResponse createGame(String authToken, String gameName) throws IOException {
         var path = "/game";
         CreateGameRequest createGame = new CreateGameRequest(null,gameName);
         return this.makeRequest("POST", path, createGame, CreateGameResponse.class, authToken);
     }
 
-    public void joinGame(String authToken, ChessGame.TeamColor playerColor, int gameID) throws DataAccessException {
+    public void joinGame(String authToken, ChessGame.TeamColor playerColor, int gameID) throws IOException {
         var path = "/game";
         JoinGameRequest joinGame = new JoinGameRequest(null, playerColor, gameID);
         this.makeRequest("PUT", path, joinGame, JoinGameRequest.class, authToken);
     }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws DataAccessException {
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws IOException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -72,7 +71,7 @@ public class ServerFacade {
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
         } catch (Exception ex) {
-            throw new DataAccessException(ex.getMessage());
+            throw new IOException(ex.getMessage());
         }
     }
 
@@ -94,10 +93,10 @@ public class ServerFacade {
         }
     }
 
-    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, DataAccessException {
+    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException {
         var status = http.getResponseCode();
         if (!isSuccessful(status)) {
-            throw new DataAccessException("failure: " + status);
+            throw new IOException("failure: " + status);
         }
     }
 

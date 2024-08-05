@@ -9,7 +9,7 @@ import responses.ListGamesResponse;
 import responses.LoginResponse;
 import responses.RegisterResponse;
 import server.Server;
-import server.ServerFacade;
+import serverfacade.ServerFacade;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -34,7 +34,7 @@ public class ServerFacadeTests {
     }
 
     @AfterAll
-    static void stopServer() throws DataAccessException {
+    static void stopServer(){
         server.stop();
     }
 

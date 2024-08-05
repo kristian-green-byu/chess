@@ -1,10 +1,10 @@
 import chess.ChessGame;
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
 import responses.LoginResponse;
 import responses.RegisterResponse;
-import server.ServerFacade;
+import serverfacade.ServerFacade;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -32,16 +32,16 @@ public class ChessClient {
                     case "joinGame" -> joinGame(params);
                     case "clear" -> clear();
                     case "quit" -> "quit";
-                    default -> help();
+                    default -> preLoginHelp();
                 };
             }
-        } catch (DataAccessException e) {
+        } catch (IOException e) {
             result = e.getMessage();
         }
         return result;
     }
 
-    public String register(String... params) throws DataAccessException {
+    public String register(String... params) throws IOException {
         try{
             if(params.length == 3){
                 var username = params[0];
@@ -52,10 +52,10 @@ public class ChessClient {
             }
         } catch (Exception ignore){
         }
-        throw new DataAccessException("Expected: <username> <password> <email>");
+        throw new IOException("Expected: <username> <password> <email>");
     }
 
-    public String login(String... params) throws DataAccessException {
+    public String login(String... params) throws IOException {
         try{
             if(params.length == 2){
                 var username = params[0];
@@ -65,15 +65,15 @@ public class ChessClient {
             }
         } catch (Exception ignore){
         }
-        throw new DataAccessException("Expected: <username> <password>");
+        throw new IOException("Expected: <username> <password>");
     }
 
-    public String logout(String authToken) throws DataAccessException {
+    public String logout(String authToken) throws IOException {
         server.logout(authToken);
         return "User logged out.";
     }
 
-    public String listGames(String authToken) throws DataAccessException {
+    public String listGames(String authToken) throws IOException {
         var gameResponse = server.listGames(authToken);
         var games = gameResponse.games();
         var result = new StringBuilder();
@@ -84,7 +84,7 @@ public class ChessClient {
         return result.toString();
     }
 
-    public String createGame(String... params) throws DataAccessException {
+    public String createGame(String... params) throws IOException {
         try{
             if(params.length == 1){
                 var gameName = params[0];
@@ -92,10 +92,10 @@ public class ChessClient {
             }
         } catch (Exception ignore){
         }
-        throw new DataAccessException("Expected: <gameName>");
+        throw new IOException("Expected: <gameName>");
     }
 
-    public String joinGame(String... params) throws DataAccessException {
+    public String joinGame(String... params) throws IOException {
         try{
             if(params.length == 2){
                 var teamColorParam = params[0];
@@ -112,24 +112,20 @@ public class ChessClient {
             }
         } catch (Exception ignore){
         }
-        throw new DataAccessException("Expected: <WHITE|BLACK> <gameID>");
+        throw new IOException("Expected: <WHITE|BLACK> <gameID>");
     }
 
-    public String clear() throws DataAccessException {
+    public String clear() throws IOException {
         server.clearApplication();
         return "Cleared everything";
     }
 
-    public String help() {
+    public String preLoginHelp() {
         return """
-                - register <username> <password> <email>
-                - login <username> <password>
-                - logout
-                - listGames
-                - createGame <gameName>
-                - joinGame <WHITE|BLACK> <gameID>
-                - clear
-                - quit
+                register <username> <password> <email> - create a new account
+                login <username> <password> - login an existing user
+                quit - close the chess client
+                help - receive a list of executable commands
                 """;
     }
 }
