@@ -168,6 +168,9 @@ public class ChessClient {
                     }
                     currentID++;
                 }
+                if(gameID == 0){
+                    return "Invalid game number. Type list to see possible game numbers";
+                }
                 server.joinGame(authToken, teamColor, gameID);
 
                 return "Joined game successfully as "+teamColor;
