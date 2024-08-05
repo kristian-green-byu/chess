@@ -96,7 +96,7 @@ public class ServerFacade {
     private void throwIfNotSuccessful(HttpURLConnection http) throws IOException {
         var status = http.getResponseCode();
         if (!isSuccessful(status)) {
-            throw new IOException("Request unsuccessful: " + status);
+            throw new IOException(String.valueOf(status));
         }
     }
 

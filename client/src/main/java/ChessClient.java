@@ -49,6 +49,9 @@ public class ChessClient {
     }
 
     public String register(String... params) throws IOException {
+        if(postLogin){
+            return "You're already logged in";
+        }
         try{
             if(params.length == 3){
                 String username = params[0];
@@ -63,14 +66,19 @@ public class ChessClient {
                 return "Expected: <username> <password> <email>";
             }
         } catch (Exception e){
-            if(e.getMessage().equals("Request unsuccessful: 403")){
-                return "Request unsuccessful. Verify your inputs and try again";
+            if(e.getMessage().equals("403")){
+                return "User already taken";
             }
-            return e.getMessage();
+            else {
+                return "Request failed. Verify your inputs and try again";
+            }
         }
     }
 
     public String login(String... params) throws IOException {
+        if(postLogin){
+            return "You're already logged in";
+        }
         try{
             if(params.length == 2){
                 var username = params[0];
@@ -84,7 +92,12 @@ public class ChessClient {
                 return "Expected: <username> <password>";
             }
         } catch (Exception e){
-            return e.getMessage();
+            if(e.getMessage().equals("401")){
+                return "Username or password is invalid. Please verify your inputs and try again";
+            }
+            else{
+                return "Request failed. Verify your inputs and try again";
+            }
         }
     }
 
@@ -94,10 +107,16 @@ public class ChessClient {
         }
         try{
             server.logout(authToken);
+            postLogin = false;
             return "Logged out successfully";
         }
         catch (Exception e){
-            return e.getMessage();
+            if(e.getMessage().equals("401")){
+                return "You are not logged in";
+            }
+            else{
+                return "Request failed. Verify your inputs and try again";
+            }
         }
     }
 
@@ -119,7 +138,12 @@ public class ChessClient {
             return result.toString();
         }
         catch (Exception e){
-            return e.getMessage();
+            if(e.getMessage().equals("401")){
+                return "You are not logged in";
+            }
+            else {
+                return "Request failed. Verify your inputs and try again";
+            }
         }
     }
 
@@ -137,7 +161,12 @@ public class ChessClient {
                 return "Expected: <gameName>";
             }
         } catch (Exception e){
-            return e.getMessage();
+            if(e.getMessage().equals("401")){
+                return "Your request is invalid. Ensure you are logged in and chose a valid name";
+            }
+            else{
+                return "Request failed. Verify your inputs and try again";
+            }
         }
     }
 
@@ -160,7 +189,7 @@ public class ChessClient {
                             "as white and black to join as black\n"
                             +"Make sure you follow the format join <white|black> <gameNumber>";
                 }
-                if(!isNumeric(params[1])){
+                if(isNotNumeric(params[1])){
                     return "You did not input a valid integer for <gameNumber>. Please try again";
                 }
                 int desiredID  = Integer.parseInt(params[1]);
@@ -179,16 +208,27 @@ public class ChessClient {
                 return "Expected: <white|black> <gameNumber>";
             }
         } catch (Exception e){
-            return e.getMessage();
+            if(e.getMessage().equals("401")){
+                return "You are not logged in";
+            }
+            else if(e.getMessage().equals("400")){
+                return "Game doesn't exist";
+            }
+            else if(e.getMessage().equals("403")){
+                return "There is already a player of your requested color";
+            }
+            else{
+                return "Request failed. Verify your inputs and try again";
+            }
         }
     }
 
-    private static boolean isNumeric(String str) {
+    private static boolean isNotNumeric(String str) {
         try {
             Double.parseDouble(str);
-            return true;
-        } catch (NumberFormatException e) {
             return false;
+        } catch (NumberFormatException e) {
+            return true;
         }
     }
 
@@ -213,7 +253,7 @@ public class ChessClient {
         }
         try{
             if(params.length == 1){
-                if(!isNumeric(params[0])){
+                if(isNotNumeric(params[0])){
                     return "You did not input a valid integer for <gameNumber>. Please try again";
                 }
                 int desiredID  = Integer.parseInt(params[0]);
@@ -231,7 +271,12 @@ public class ChessClient {
                 return "Expected: <gameNumber>";
             }
         } catch (Exception e){
-            return e.getMessage();
+            if(e.getMessage().equals("401")){
+                return "You are not logged in";
+            }
+            else {
+                return "Request failed. Verify your inputs and try again";
+            }
         }
     }
 
