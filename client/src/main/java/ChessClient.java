@@ -310,13 +310,11 @@ public class ChessClient {
                 " a  b  c  d  e  f  g  h " + EMPTY + RESET_BG_COLOR + '\n';
         int colNum = 8;
         if(color == ChessGame.TeamColor.BLACK){
-            StringBuilder reverseBoardString = new StringBuilder();
-            reverseBoardString.append(boardString);
+            StringBuilder reverseBoardString = new StringBuilder(boardString);
             reverseBoardString.reverse();
             reverseBoardString.delete(0, 1);
             reverseBoardString.append('\n');
             boardString = reverseBoardString.toString();
-            alt = true;
             topBorder = SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY +
                     " h  g  f  e  d  c  b  a " + EMPTY + RESET_BG_COLOR + '\n';
             colNum = 1;
