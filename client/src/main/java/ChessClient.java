@@ -226,6 +226,7 @@ public class ChessClient {
         boolean alt = false;
         String topBorder = SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY +
                 " a  b  c  d  e  f  g  h " + EMPTY + RESET_BG_COLOR + '\n';
+        int colNum = 8;
         if(color == ChessGame.TeamColor.BLACK){
             StringBuilder reverseBoardString = new StringBuilder();
             reverseBoardString.append(boardString);
@@ -236,9 +237,9 @@ public class ChessClient {
             alt = true;
             topBorder = SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY +
                     " h  g  f  e  d  c  b  a " + EMPTY + RESET_BG_COLOR + '\n';
+            colNum = 1;
         }
         result.append(topBorder);
-        int colNum = 8;
         for (var line : boardString.split("\n")) {
             result.append(SET_BG_COLOR_WHITE).append(SET_TEXT_COLOR_BLACK).append(' ').append(colNum).append(' ');
             for(var character : line.toCharArray()) {
@@ -295,7 +296,12 @@ public class ChessClient {
                 }
             }
             result.append(SET_BG_COLOR_WHITE).append(SET_TEXT_COLOR_BLACK).append(' ').append(colNum).append(' ');
-            colNum--;
+            if(color == ChessGame.TeamColor.WHITE){
+                colNum--;
+            }
+            else {
+                colNum++;
+            }
             result.append(RESET_BG_COLOR + '\n');
             alt = !alt;
         }
