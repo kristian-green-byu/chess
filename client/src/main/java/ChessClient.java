@@ -1,5 +1,4 @@
 import chess.ChessGame;
-import com.google.gson.Gson;
 import responses.LoginResponse;
 import responses.RegisterResponse;
 import serverfacade.ServerFacade;
@@ -105,9 +104,12 @@ public class ChessClient {
             var gameResponse = server.listGames(authToken);
             var games = gameResponse.games();
             var result = new StringBuilder();
-            var gson = new Gson();
+            int gameStringID = 1;
             for (var game : games) {
-                result.append(gson.toJson(game)).append('\n');
+                result.append(gameStringID).append(". Name: ").append(game.gameName())
+                        .append(" White Player: ").append(game.whiteUsername())
+                        .append(" Black Player: ").append(game.blackUsername()).append('\n');
+                gameStringID++;
             }
             return result.toString();
         }
@@ -141,7 +143,7 @@ public class ChessClient {
         try{
             if(params.length == 2){
                 var teamColorParam = params[0];
-                ChessGame.TeamColor teamColor = null;
+                ChessGame.TeamColor teamColor;
                 if(Objects.equals(teamColorParam, "white")){
                     teamColor = ChessGame.TeamColor.WHITE;
                 }
