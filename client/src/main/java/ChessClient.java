@@ -1,3 +1,4 @@
+import chess.ChessBoard;
 import chess.ChessGame;
 import model.GameData;
 import responses.LoginResponse;
@@ -6,17 +7,20 @@ import serverfacade.ServerFacade;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Objects;
+
+import static ui.EscapeSequences.*;
 
 public class ChessClient {
     private static ServerFacade server;
     private static String authToken;
     private boolean postLogin;
+    private boolean inGame;
 
     public ChessClient(int port) {
         server = new ServerFacade("http://localhost:"+port);
         postLogin = false;
+        inGame = false;
     }
 
     public String eval(String line){
@@ -153,17 +157,23 @@ public class ChessClient {
                     teamColor = ChessGame.TeamColor.BLACK;
                 }
                 else{
-                    return "please only write white to join " +
-                            "as white and black to join as black";
+                    return "Please only write white to join " +
+                            "as white and black to join as black\n"
+                            +"Make sure you follow the format join <white|black> <gameNumber>";
+                }
+                if(!isNumeric(params[1])){
+                    return "You did not input a valid integer for <gameNumber>. Please try again";
                 }
                 int desiredID  = Integer.parseInt(params[1]);
                 var gameResponse = server.listGames(authToken);
                 var games = gameResponse.games();
                 int currentID = 1;
                 int gameID = 0;
+                GameData gameData = null;
                 for (var game : games) {
                     if(desiredID == currentID){
                         gameID = game.gameID();
+                        gameData = game;
                         break;
                     }
                     currentID++;
@@ -172,8 +182,8 @@ public class ChessClient {
                     return "Invalid game number. Type list to see possible game numbers";
                 }
                 server.joinGame(authToken, teamColor, gameID);
-
-                return "Joined game successfully as "+teamColor;
+                inGame = true;
+                return "Joined game successfully as "+teamColor+"\n"+ displayBoard(gameData);
             }
             else{
                 return "Expected: <white|black> <gameNumber>";
@@ -183,13 +193,22 @@ public class ChessClient {
         }
     }
 
+    private static boolean isNumeric(String str) {
+        try {
+            Double.parseDouble(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     public String clear() throws IOException {
         server.clearApplication();
         postLogin = false;
         return "Cleared everything";
     }
 
-    public String help() {
+    private String help() {
         if(postLogin){
             return postLoginHelp();
         }
@@ -197,8 +216,74 @@ public class ChessClient {
             return preLoginHelp();
         }
     }
+    
+    private String displayBoard(GameData gameData){
+        ChessGame game = gameData.game();
+        ChessBoard board = game.getBoard();
+        String boardString = board.toString();
+        StringBuilder result = new StringBuilder();
+        boolean alt = false;
+        for (var line : boardString.split("\n")) {
+            for(var character : line.toCharArray()) {
+                if(character == '|'){
+                    continue;
+                }
+                if(alt){
+                    result.append(SET_BG_COLOR_DARK_GREY);
+                    alt = false;
+                }
+                else{
+                    result.append(SET_BG_COLOR_LIGHT_GREY);
+                    alt = true;
+                }
 
-    public String postLoginHelp() {
+                if(character == ' '){
+                    result.append(EMPTY);
+                }
+                else if(character == 'r'){
+                    result.append(SET_TEXT_COLOR_BLACK + BLACK_ROOK);
+                }
+                else if(character == 'n'){
+                    result.append(SET_TEXT_COLOR_BLACK + BLACK_KNIGHT);
+                }
+                else if(character == 'b'){
+                    result.append(SET_TEXT_COLOR_BLACK + BLACK_BISHOP);
+                }
+                else if(character == 'q'){
+                    result.append(SET_TEXT_COLOR_BLACK + BLACK_QUEEN);
+                }
+                else if(character == 'k'){
+                    result.append(SET_TEXT_COLOR_BLACK + BLACK_KING);
+                }
+                else if(character == 'p'){
+                    result.append(SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+                }
+                else if(character == 'R'){
+                    result.append(SET_TEXT_COLOR_WHITE + WHITE_ROOK);
+                }
+                else if(character == 'N'){
+                    result.append(SET_TEXT_COLOR_WHITE + WHITE_KNIGHT);
+                }
+                else if(character == 'B'){
+                    result.append(SET_TEXT_COLOR_WHITE + WHITE_BISHOP);
+                }
+                else if(character == 'Q'){
+                    result.append(SET_TEXT_COLOR_WHITE + WHITE_QUEEN);
+                }
+                else if(character == 'K'){
+                    result.append(SET_TEXT_COLOR_WHITE + WHITE_KING);
+                }
+                else if(character == 'P'){
+                    result.append(SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+                }
+            }
+            result.append(RESET_BG_COLOR + '\n');
+            alt = !alt;
+        }
+        return result.toString();
+    }
+    
+    private String postLoginHelp() {
         return """
                 create <gameName> - create a new chess game
                 list - list active chess games
@@ -209,7 +294,7 @@ public class ChessClient {
                 """;
     }
 
-    public String preLoginHelp() {
+    private String preLoginHelp() {
         return """
                 register <username> <password> <email> - create a new account
                 login <username> <password> - login an existing user
