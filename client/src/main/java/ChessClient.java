@@ -134,6 +134,9 @@ public class ChessClient {
                         .append(" Black Player: ").append(game.blackUsername()).append('\n');
                 gameStringID++;
             }
+            if(games.isEmpty()){
+                return "There are no currently no games.";
+            }
             return result.toString();
         }
         catch (Exception e){
