@@ -65,7 +65,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void clear() throws IOException {
+    public void clearWithData() throws IOException {
         facade.register("nada", "password", "ninguem@email.com");
         facade.register("player1", "password", "p1@email.com");
         facade.register("bob", "carlisle", "bobc@email.com");
@@ -73,6 +73,11 @@ public class ServerFacadeTests {
         Assertions.assertThrows(IOException.class, () -> facade.login("nada", "password"));
         Assertions.assertThrows(IOException.class, () -> facade.login("player1", "password"));
         Assertions.assertThrows(IOException.class, () -> facade.login("bob", "carlisle"));
+    }
+
+    @Test
+    public void clearWithoutData() {
+        Assertions.assertDoesNotThrow(() ->facade.clearApplication());
     }
 
     @Test
@@ -126,7 +131,21 @@ public class ServerFacadeTests {
         RegisterResponse registerResponse = facade.register("robert", "mcdonald", "mcds@email.com");
         CreateGameResponse response = facade.createGame(registerResponse.authToken(), "test");
         facade.logout(registerResponse.authToken());
-        Assertions.assertThrows(IOException.class, () -> facade.joinGame(registerResponse.authToken(), ChessGame.TeamColor.WHITE, response.gameID()));
+        Assertions.assertThrows(IOException.class
+                , () -> facade.joinGame(registerResponse.authToken(), ChessGame.TeamColor.WHITE, response.gameID()));
+    }
+
+    @Test
+    public void createGameSuccess() throws IOException {
+        RegisterResponse registerResponse = facade.register("robert", "mcdonald", "mcds@email.com");
+        facade.createGame(registerResponse.authToken(), "test");
+        ListGamesResponse listGamesResponse = facade.listGames(registerResponse.authToken());
+        Assertions.assertEquals(1, listGamesResponse.games().size());
+    }
+
+    @Test
+    public void createGameNoAuth(){
+        Assertions.assertThrows(IOException.class, ()-> facade.createGame("fake", "test"));
     }
 
 }
