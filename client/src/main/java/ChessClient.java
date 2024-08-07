@@ -461,8 +461,8 @@ public class ChessClient {
         return """
                 create <gameName> - create a new chess game
                 list - list active chess games
-                join <WHITE|BLACK> <gameNumber> - join a chess game; list the games to find game number
-                observe <gameNumber> - observe a chess game without playing; list the games to find game number
+                join <WHITE|BLACK> <gameNumber> - join a chess game; list the games to find the game number
+                observe <gameNumber> - observe a chess game without playing; list the games to find the game number
                 logout - logout when finished
                 quit - close the chess client
                 help - receive a list of executable commands
