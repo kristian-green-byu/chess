@@ -16,11 +16,15 @@ public class ChessClient {
     private static String authToken;
     private boolean postLogin;
     private boolean inGame;
+    private String user;
+    private int joinedGame;
 
     public ChessClient(int port) {
         server = new ServerFacade("http://localhost:" + port);
         postLogin = false;
         inGame = false;
+        user = null;
+        joinedGame = 0;
     }
 
     public String eval(String line){
@@ -40,6 +44,8 @@ public class ChessClient {
                     case "quit" -> "quit";
                     case "help" -> help();
                     case "observe" -> observe(params);
+                    case "leave" -> leave();
+                    case "redraw" -> redraw();
                     default -> "Invalid Command. Type help to see valid commands";
                 };
             }
@@ -64,6 +70,7 @@ public class ChessClient {
                 RegisterResponse registerResponse = server.register(username, password, email);
                 authToken = registerResponse.authToken();
                 postLogin = true;
+                user = username;
                 return "Registration successful. You are now logged in as "+username+"\nType help to see new commands";
             }
             else{
@@ -93,6 +100,7 @@ public class ChessClient {
                 LoginResponse loginResponse = server.login(username, password);
                 authToken = loginResponse.authToken();
                 postLogin = true;
+                user = username;
                 return "You are now logged in as "+username+"\nType help to see new commands";
             }
             else {
@@ -118,6 +126,7 @@ public class ChessClient {
         try{
             server.logout(authToken);
             postLogin = false;
+            user = null;
             return "Logged out successfully";
         }
         catch (Exception e){
@@ -221,12 +230,14 @@ public class ChessClient {
                 }
                 server.joinGame(authToken, teamColor, gameData.gameID());
                 inGame = true;
+                postLogin = false;
+                joinedGame = desiredID;
                 if(teamColor == ChessGame.TeamColor.WHITE){
-                    return "Joined game successfully as "+teamColor+"\n\n"+
+                    return "Joined game successfully as "+teamColor+"\nType help to see new commands."+"\n\n"+
                             displayBoard(gameData, ChessGame.TeamColor.WHITE);
                 }
                 else{
-                    return "Joined game successfully as "+teamColor+"\n\n"+
+                    return "Joined game successfully as "+teamColor+"\nType help to see new commands."+"\n\n"+
                             displayBoard(gameData, ChessGame.TeamColor.BLACK);
                 }
             }
@@ -274,6 +285,9 @@ public class ChessClient {
         if(!postLogin){
             return "Login first to observe a game";
         }
+        if (inGame) {
+            return "Leave your game first to complete this request";
+        }
         try{
             if(params.length == 1){
                 if(isNotNumeric(params[0])){
@@ -284,7 +298,10 @@ public class ChessClient {
                 if (gameData == null){
                     return "Invalid game number. Type list to see possible game numbers";
                 }
-                return "Observing game "+desiredID+"\n\n"+
+                inGame = true;
+                postLogin = false;
+                joinedGame = desiredID;
+                return "Observing game "+desiredID+"\nType help to see new commands."+"\n\n"+
                         displayBoard(gameData, ChessGame.TeamColor.WHITE)+
                         SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLACK+
                         "                              "+ RESET_BG_COLOR + '\n'+
@@ -300,6 +317,34 @@ public class ChessClient {
             else {
                 return "Request failed. Verify your inputs and try again";
             }
+        }
+    }
+
+    public String leave() throws IOException {
+        if (!inGame) {
+            return "Join a game first to complete this request";
+        }
+        postLogin = true;
+        inGame = false;
+        return "Placeholder";
+    }
+
+    public String redraw() throws IOException {
+        if (!inGame) {
+            return "Join a game first to complete this request";
+        }
+        GameData gameData = getGameData(joinedGame);
+        if(Objects.equals(Objects.requireNonNull(gameData).whiteUsername(), user)){
+            return "Redrawing the board...\n"+displayBoard(gameData, ChessGame.TeamColor.WHITE);
+        }
+        else if(Objects.equals(Objects.requireNonNull(gameData).blackUsername(), user)){
+            return "Redrawing the board...\n"+displayBoard(gameData, ChessGame.TeamColor.BLACK);
+        }
+        else {
+            return "Redrawing the board...\n"+displayBoard(gameData, ChessGame.TeamColor.WHITE)+
+                    SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLACK+
+                    "                              "+ RESET_BG_COLOR + '\n'+
+                    displayBoard(gameData, ChessGame.TeamColor.BLACK);
         }
     }
 

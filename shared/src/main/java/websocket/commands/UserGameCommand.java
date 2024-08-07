@@ -40,7 +40,7 @@ public class UserGameCommand {
     public Integer getGameID() {
         return gameID;
     }
-    /* uncomment when ready to implement
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -50,15 +50,15 @@ public class UserGameCommand {
             return false;
         }
 
-        UserGameCommand that = (UserGameCommand) o
+        UserGameCommand that = (UserGameCommand) o;
         return getCommandType() == that.getCommandType() &&
-                Objects.equals(getAuthString(), that.getAuthString()) &&
+                Objects.equals(getAuthToken(), that.getAuthToken()) &&
                 Objects.equals(getGameID(), that.getGameID());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getCommandType(), getAuthString(), getGameID());
+        return Objects.hash(getCommandType(), getAuthToken(), getGameID());
     }
-     */
+
 }
