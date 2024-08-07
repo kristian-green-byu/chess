@@ -40,7 +40,7 @@ public class UserGameCommand {
     public Integer getGameID() {
         return gameID;
     }
-
+    /* uncomment when ready to implement
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -49,7 +49,8 @@ public class UserGameCommand {
         if (!(o instanceof UserGameCommand)) {
             return false;
         }
-        UserGameCommand that = (UserGameCommand) o;
+
+        UserGameCommand that = (UserGameCommand) o
         return getCommandType() == that.getCommandType() &&
                 Objects.equals(getAuthString(), that.getAuthString()) &&
                 Objects.equals(getGameID(), that.getGameID());
@@ -59,4 +60,5 @@ public class UserGameCommand {
     public int hashCode() {
         return Objects.hash(getCommandType(), getAuthString(), getGameID());
     }
+     */
 }

@@ -15,10 +15,12 @@ public class ChessClient {
     private static ServerFacade server;
     private static String authToken;
     private boolean postLogin;
+    private boolean inGame;
 
     public ChessClient(int port) {
-        server = new ServerFacade("http://localhost:"+port);
+        server = new ServerFacade("http://localhost:" + port);
         postLogin = false;
+        inGame = false;
     }
 
     public String eval(String line){
@@ -51,6 +53,9 @@ public class ChessClient {
         if(postLogin){
             return "You're already logged in";
         }
+        if (inGame) {
+            return "Leave your game first to complete this request";
+        }
         try{
             if(params.length == 3){
                 String username = params[0];
@@ -78,6 +83,9 @@ public class ChessClient {
         if(postLogin){
             return "You're already logged in";
         }
+        if (inGame) {
+            return "Leave your game first to complete this request";
+        }
         try{
             if(params.length == 2){
                 var username = params[0];
@@ -104,6 +112,9 @@ public class ChessClient {
         if(!postLogin){
             return "You are not logged in";
         }
+        if (inGame) {
+            return "Leave your game first to complete this request";
+        }
         try{
             server.logout(authToken);
             postLogin = false;
@@ -122,6 +133,9 @@ public class ChessClient {
     public String listGames(String authToken) throws IOException {
         if(!postLogin){
             return "Login first to see current games";
+        }
+        if (inGame) {
+            return "Leave your game first to complete this request";
         }
         try{
             var gameResponse = server.listGames(authToken);
@@ -153,6 +167,9 @@ public class ChessClient {
         if(!postLogin){
             return "Login first to create a game";
         }
+        if (inGame) {
+            return "Leave your game first to complete this request";
+        }
         try{
             if(params.length == 1){
                 var gameName = params[0];
@@ -175,6 +192,9 @@ public class ChessClient {
     public String joinGame(String... params) throws IOException {
         if(!postLogin){
             return "Login first to join a game";
+        }
+        if (inGame) {
+            return "Leave your game first to complete this request";
         }
         try{
             if(params.length == 2){
@@ -200,11 +220,15 @@ public class ChessClient {
                     return "Invalid game number. Type list to see possible game numbers";
                 }
                 server.joinGame(authToken, teamColor, gameData.gameID());
-                return "Joined game successfully as "+teamColor+"\n\n"+
-                        displayBoard(gameData, ChessGame.TeamColor.WHITE)+
-                        SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLACK+
-                        "                              "+ RESET_BG_COLOR + '\n'+
-                        displayBoard(gameData, ChessGame.TeamColor.BLACK);
+                inGame = true;
+                if(teamColor == ChessGame.TeamColor.WHITE){
+                    return "Joined game successfully as "+teamColor+"\n\n"+
+                            displayBoard(gameData, ChessGame.TeamColor.WHITE);
+                }
+                else{
+                    return "Joined game successfully as "+teamColor+"\n\n"+
+                            displayBoard(gameData, ChessGame.TeamColor.BLACK);
+                }
             }
             else{
                 return "Expected: <white|black> <gameNumber>";
@@ -238,8 +262,11 @@ public class ChessClient {
         if(postLogin){
             return postLoginHelp();
         }
-        else {
+        else if(!inGame) {
             return preLoginHelp();
+        }
+        else {
+            return inGameHelp();
         }
     }
 
@@ -401,6 +428,18 @@ public class ChessClient {
         return """
                 register <username> <password> <email> - create a new account
                 login <username> <password> - login an existing user
+                quit - close the chess client
+                help - receive a list of executable commands
+                """;
+    }
+
+    private String inGameHelp() {
+        return """
+                redraw - refresh the chessboard
+                leave - leave the game
+                move <from> <to> - make a chess move
+                resign - forfeit the game without leaving
+                highlight <coordinate> - see legal moves for a given piece
                 quit - close the chess client
                 help - receive a list of executable commands
                 """;
