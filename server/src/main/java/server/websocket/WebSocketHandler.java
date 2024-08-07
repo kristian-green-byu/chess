@@ -9,9 +9,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ServerMessage;
-
-import static websocket.commands.UserGameCommand.CommandType.*;
+import websocket.messages.NotificationMessage;
 
 import java.io.IOException;
 
@@ -42,27 +40,18 @@ public class WebSocketHandler {
     }
 
     private void enter(String authToken, Session session) throws IOException, DataAccessException {
-        connections.add(authToken, session);
         String username = getUsername(authToken);
+        connections.add(username, session);
         var message = String.format("%s joined the game", username);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        var notification = new NotificationMessage(message);
         connections.broadcast(username, notification);
     }
 
-    private void exit(String visitorName) throws IOException {
-        connections.remove(visitorName);
-        var message = String.format("%s left the shop", visitorName);
-        var notification = new Notification(Notification.Type.DEPARTURE, message);
-        connections.broadcast(visitorName, notification);
-    }
-
-    public void makeNoise(String petName, String sound) throws DataAccessException {
-        try {
-            var message = String.format("%s says %s", petName, sound);
-            var notification = new Notification(Notification.Type.NOISE, message);
-            connections.broadcast("", notification);
-        } catch (Exception ex) {
-            throw new DataAccessException(ex.getMessage());
-        }
+    private void exit(String authToken) throws IOException, DataAccessException {
+        String username = getUsername(authToken);
+        connections.remove(username);
+        var message = String.format("%s left the game", username);
+        var notification = new NotificationMessage(message);
+        connections.broadcast(username, notification);
     }
 }
