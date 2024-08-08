@@ -1,9 +1,11 @@
 import chess.ChessBoard;
 import chess.ChessGame;
+import com.sun.nio.sctp.NotificationHandler;
 import model.GameData;
 import responses.LoginResponse;
 import responses.RegisterResponse;
 import serverfacade.ServerFacade;
+import websocket.WebSocketFacade;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -18,6 +20,9 @@ public class ChessClient {
     private boolean inGame;
     private String user;
     private int joinedGame;
+    private NotificationHandler notificationHandler;
+    private WebSocketFacade ws;
+    private int port;
 
     public ChessClient(int port) {
         server = new ServerFacade("http://localhost:" + port);
@@ -25,6 +30,8 @@ public class ChessClient {
         inGame = false;
         user = null;
         joinedGame = 0;
+        this.notificationHandler = notificationHandler;
+        this.port = port;
     }
 
     public String eval(String line){
@@ -232,6 +239,8 @@ public class ChessClient {
                 inGame = true;
                 postLogin = false;
                 joinedGame = desiredID;
+                ws = new WebSocketFacade("http://localhost:" + port);
+                ws.joinGame(authToken, gameData.gameID());
                 if(teamColor == ChessGame.TeamColor.WHITE){
                     return "Joined game successfully as "+teamColor+"\nType help to see new commands."+"\n\n"+
                             displayBoard(gameData, ChessGame.TeamColor.WHITE);
