@@ -8,6 +8,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
@@ -47,6 +48,11 @@ public class WebSocketHandler {
     private void connect(String username, Session session, Integer gameID) throws IOException, DataAccessException {
         connections.add(username, session);
         GameData game = gameDAO.getGame(gameID);
+        if(game==null){
+            var error = new ErrorMessage("Error: Requested game doesn't exist");
+            connections.sendMessageToUser(username, error);
+            return;
+        }
         var loadGame = new LoadGameMessage(game);
         connections.sendMessageToUser(username, loadGame);
         var message = String.format("%s joined the game", username);

@@ -68,7 +68,7 @@ public class WebSocketFacade extends Endpoint {
 
     private void receiveError(String message) {
         ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
-        System.out.println(errorMessage.getError());
+        System.out.println(errorMessage.getErrorMessage());
     }
 
     private String displayBoard(GameData gameData, ChessGame.TeamColor color){
