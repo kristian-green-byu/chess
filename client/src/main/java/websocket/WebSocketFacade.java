@@ -63,7 +63,7 @@ public class WebSocketFacade extends Endpoint {
         LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
         GameData game = loadGameMessage.getGame();
         String board = displayBoard(game, teamColor);
-        System.out.println(board);
+        System.out.println('\n'+board);
     }
 
     private void receiveError(String message) {
