@@ -9,6 +9,7 @@ import websocket.WebSocketFacade;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
@@ -238,6 +239,7 @@ public class ChessClient {
                 inGame = true;
                 postLogin = false;
                 joinedGame = desiredID;
+                Thread.sleep(500);
                 return "Joined game " + desiredID +" successfully.";
             }
             else{
