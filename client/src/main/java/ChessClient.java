@@ -1,6 +1,5 @@
-import chess.ChessBoard;
+
 import chess.ChessGame;
-import com.sun.nio.sctp.NotificationHandler;
 import model.GameData;
 import responses.LoginResponse;
 import responses.RegisterResponse;
@@ -20,9 +19,8 @@ public class ChessClient {
     private boolean inGame;
     private String user;
     private int joinedGame;
-    private NotificationHandler notificationHandler;
     private WebSocketFacade ws;
-    private int port;
+    private final int port;
 
     public ChessClient(int port) {
         server = new ServerFacade("http://localhost:" + port);
@@ -30,7 +28,6 @@ public class ChessClient {
         inGame = false;
         user = null;
         joinedGame = 0;
-        this.notificationHandler = notificationHandler;
         this.port = port;
     }
 
@@ -236,19 +233,12 @@ public class ChessClient {
                     return "Invalid game number. Type list to see possible game numbers";
                 }
                 server.joinGame(authToken, teamColor, gameData.gameID());
+                ws = new WebSocketFacade("http://localhost:" + port, teamColor);
+                ws.joinGame(authToken, gameData.gameID());
                 inGame = true;
                 postLogin = false;
                 joinedGame = desiredID;
-                ws = new WebSocketFacade("http://localhost:" + port);
-                ws.joinGame(authToken, gameData.gameID());
-                if(teamColor == ChessGame.TeamColor.WHITE){
-                    return "Joined game successfully as "+teamColor+"\nType help to see new commands."+"\n\n"+
-                            displayBoard(gameData, ChessGame.TeamColor.WHITE);
-                }
-                else{
-                    return "Joined game successfully as "+teamColor+"\nType help to see new commands."+"\n\n"+
-                            displayBoard(gameData, ChessGame.TeamColor.BLACK);
-                }
+                return "Joined game " + desiredID +" successfully.";
             }
             else{
                 return "Expected: <white|black> <gameNumber>";
@@ -311,10 +301,10 @@ public class ChessClient {
                 postLogin = false;
                 joinedGame = desiredID;
                 return "Observing game "+desiredID+"\nType help to see new commands."+"\n\n"+
-                        displayBoard(gameData, ChessGame.TeamColor.WHITE)+
+                        //displayBoard(gameData, ChessGame.TeamColor.WHITE)+
                         SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLACK+
-                        "                              "+ RESET_BG_COLOR + '\n'+
-                        displayBoard(gameData, ChessGame.TeamColor.BLACK);
+                        "                              "+ RESET_BG_COLOR + '\n';
+                        //displayBoard(gameData, ChessGame.TeamColor.BLACK);
             }
             else{
                 return "Expected: <gameNumber>";
@@ -344,16 +334,16 @@ public class ChessClient {
         }
         GameData gameData = getGameData(joinedGame);
         if(Objects.equals(Objects.requireNonNull(gameData).whiteUsername(), user)){
-            return "Redrawing the board...\n"+displayBoard(gameData, ChessGame.TeamColor.WHITE);
+            return "Redrawing the board...\n"; //displayBoard(gameData, ChessGame.TeamColor.WHITE);
         }
         else if(Objects.equals(Objects.requireNonNull(gameData).blackUsername(), user)){
-            return "Redrawing the board...\n"+displayBoard(gameData, ChessGame.TeamColor.BLACK);
+            return "Redrawing the board...\n"; //displayBoard(gameData, ChessGame.TeamColor.BLACK);
         }
         else {
-            return "Redrawing the board...\n"+displayBoard(gameData, ChessGame.TeamColor.WHITE)+
-                    SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLACK+
-                    "                              "+ RESET_BG_COLOR + '\n'+
-                    displayBoard(gameData, ChessGame.TeamColor.BLACK);
+            return "Redrawing the board...\n"; //displayBoard(gameData, ChessGame.TeamColor.WHITE)+
+                    //SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLACK+
+                    //"                              "+ RESET_BG_COLOR + '\n';
+                    //displayBoard(gameData, ChessGame.TeamColor.BLACK);
         }
     }
 
@@ -375,95 +365,6 @@ public class ChessClient {
             return null;
         }
         return gameData;
-    }
-
-    private String displayBoard(GameData gameData, ChessGame.TeamColor color){
-        ChessGame game = gameData.game();
-        ChessBoard board = game.getBoard();
-        String boardString = board.toString();
-        StringBuilder result = new StringBuilder();
-        boolean alt = false;
-        String topBorder = SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY +
-                " a  b  c  d  e  f  g  h " + EMPTY + RESET_BG_COLOR + '\n';
-        int colNum = 8;
-        if(color == ChessGame.TeamColor.BLACK){
-            StringBuilder reverseBoardString = new StringBuilder(boardString);
-            reverseBoardString.reverse();
-            reverseBoardString.delete(0, 1);
-            reverseBoardString.append('\n');
-            boardString = reverseBoardString.toString();
-            topBorder = SET_BG_COLOR_WHITE + SET_TEXT_COLOR_BLACK + EMPTY +
-                    " h  g  f  e  d  c  b  a " + EMPTY + RESET_BG_COLOR + '\n';
-            colNum = 1;
-        }
-        result.append(topBorder);
-        for (var line : boardString.split("\n")) {
-            result.append(SET_BG_COLOR_WHITE).append(SET_TEXT_COLOR_BLACK).append(' ').append(colNum).append(' ');
-            for(var character : line.toCharArray()) {
-                if(character == '|'){
-                    continue;
-                }
-                if(alt){
-                    result.append(SET_BG_COLOR_DARK_GREY);
-                    alt = false;
-                }
-                else{
-                    result.append(SET_BG_COLOR_LIGHT_GREY);
-                    alt = true;
-                }
-
-                if(character == ' '){
-                    result.append(EMPTY);
-                }
-                else if(character == 'r'){
-                    result.append(SET_TEXT_COLOR_BLACK + BLACK_ROOK);
-                }
-                else if(character == 'n'){
-                    result.append(SET_TEXT_COLOR_BLACK + BLACK_KNIGHT);
-                }
-                else if(character == 'b'){
-                    result.append(SET_TEXT_COLOR_BLACK + BLACK_BISHOP);
-                }
-                else if(character == 'q'){
-                    result.append(SET_TEXT_COLOR_BLACK + BLACK_QUEEN);
-                }
-                else if(character == 'k'){
-                    result.append(SET_TEXT_COLOR_BLACK + BLACK_KING);
-                }
-                else if(character == 'p'){
-                    result.append(SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-                }
-                else if(character == 'R'){
-                    result.append(SET_TEXT_COLOR_WHITE + WHITE_ROOK);
-                }
-                else if(character == 'N'){
-                    result.append(SET_TEXT_COLOR_WHITE + WHITE_KNIGHT);
-                }
-                else if(character == 'B'){
-                    result.append(SET_TEXT_COLOR_WHITE + WHITE_BISHOP);
-                }
-                else if(character == 'Q'){
-                    result.append(SET_TEXT_COLOR_WHITE + WHITE_QUEEN);
-                }
-                else if(character == 'K'){
-                    result.append(SET_TEXT_COLOR_WHITE + WHITE_KING);
-                }
-                else if(character == 'P'){
-                    result.append(SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-                }
-            }
-            result.append(SET_BG_COLOR_WHITE).append(SET_TEXT_COLOR_BLACK).append(' ').append(colNum).append(' ');
-            if(color == ChessGame.TeamColor.WHITE){
-                colNum--;
-            }
-            else {
-                colNum++;
-            }
-            result.append(RESET_BG_COLOR + '\n');
-            alt = !alt;
-        }
-        result.append(topBorder);
-        return result.toString();
     }
     
     private String postLoginHelp() {

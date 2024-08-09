@@ -6,9 +6,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import websocket.messages.ServerMessage;
+import com.google.gson.Gson;
+
 
 public class ConnectionManager {
-    public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<String, Connection>();
+    public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
     public void add(String username, Session session){
         Connection connection = new Connection(username, session);
@@ -24,7 +26,7 @@ public class ConnectionManager {
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
                 if (!c.username.equals(excludeUsername)) {
-                    c.send(serverMessage.toString());
+                    c.send(new Gson().toJson(serverMessage));
                 }
             } else {
                 removeList.add(c);
@@ -32,6 +34,16 @@ public class ConnectionManager {
         }
         for (var c : removeList) {
             connections.remove(c.username);
+        }
+    }
+
+    public void sendMessageToUser(String username, ServerMessage serverMessage) throws IOException {
+        for (var c : connections.values()) {
+            if(c.username.equals(username)){
+                if(c.session.isOpen()){
+                    c.send(new Gson().toJson(serverMessage));
+                }
+            }
         }
     }
 }
