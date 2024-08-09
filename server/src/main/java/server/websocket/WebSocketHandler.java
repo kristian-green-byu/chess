@@ -11,6 +11,7 @@ import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 
@@ -30,6 +31,11 @@ public class WebSocketHandler {
     public void onMessage(Session session, String message) throws IOException, DataAccessException {
         UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
         String username = getUsername(command.getAuthToken());
+        if(username==null){
+            ServerMessage error = new ErrorMessage("Error: User not logged in");
+            session.getRemote().sendString(new Gson().toJson(error));
+            return;
+        }
         Integer gameID = command.getGameID();
         switch (command.getCommandType()) {
             case CONNECT -> connect(username, session, gameID);
