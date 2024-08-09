@@ -235,7 +235,6 @@ public class ChessClient {
                 }
                 server.joinGame(authToken, teamColor, gameData.gameID());
                 ws = new WebSocketFacade("http://localhost:" + port, teamColor);
-                ws.joinGame(authToken, gameData.gameID());
                 inGame = true;
                 postLogin = false;
                 joinedGame = desiredID;
