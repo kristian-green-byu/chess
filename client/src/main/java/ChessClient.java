@@ -29,6 +29,7 @@ public class ChessClient {
     private WebSocketFacade ws;
     private final int port;
     private ChessGame.TeamColor color;
+    private int gameIdent;
 
     public ChessClient(int port) {
         server = new ServerFacade("http://localhost:" + port);
@@ -248,6 +249,7 @@ public class ChessClient {
                 postLogin = false;
                 joinedGame = desiredID;
                 color = teamColor;
+                gameIdent = gameData.gameID();
                 Thread.sleep(500);
                 return "Joined game " + desiredID +" successfully.";
             }
@@ -395,6 +397,7 @@ public class ChessClient {
         if(!validMoves.contains(move)){
             return "Move is not possible";
         }
+        ws.makeMove(authToken, gameIdent, move);
         return null;
     }
 

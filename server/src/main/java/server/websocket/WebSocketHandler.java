@@ -40,8 +40,11 @@ public class WebSocketHandler {
         switch (command.getCommandType()) {
             case CONNECT -> connect(username, session, gameID);
             case LEAVE -> leave(username);
+            case MAKE_MOVE -> makeMove(username, session, gameID);
         }
     }
+
+    private void makeMove(String username, Session session, Integer gameID) {}
 
     private String getUsername(String authToken) throws DataAccessException {
         AuthData userAuth = authDAO.getAuthData(authToken);
