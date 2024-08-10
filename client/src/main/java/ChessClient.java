@@ -1,6 +1,7 @@
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPiece;
 import chess.ChessPosition;
 import model.GameData;
 import responses.LoginResponse;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -369,11 +371,44 @@ public class ChessClient {
         ChessPosition fromPos = makePosition(fromString);
         ChessPosition toPos = makePosition(toString);
         Collection<ChessMove> validMoves = chessGame.validMoves(fromPos);
+        ChessPiece promotionPiece;
+        ChessPiece currentPiece = chessGame.getBoard().getPiece(fromPos);
+        ChessGame.TeamColor teamColor = currentPiece.getTeamColor();
+        if(color != teamColor){
+            return "You cannot move your opponent's pieces";
+        }
         ChessMove move = new ChessMove(fromPos, toPos, null);
+        for(ChessMove posMov : validMoves){
+            if(posMov.getPromotionPiece()!=null){
+                Scanner scanner = new Scanner(System.in);
+                System.out.print("Promotion possible! Type in the name of the piece you want to promote to"+
+                        SET_TEXT_BLINKING + RESET_TEXT_COLOR + "\n" + RESET_TEXT_BOLD_FAINT
+                        + ">>> " + SET_TEXT_COLOR_GREEN);
+                String pieceString = scanner.nextLine();
+                promotionPiece = getPromotionPiece(pieceString, teamColor);
+                if(promotionPiece == null){
+                    return "You entered an invalid promotion piece";
+                }
+                move = new ChessMove(fromPos, toPos, promotionPiece.getPieceType());
+            }
+        }
         if(!validMoves.contains(move)){
             return "Move is not possible";
         }
         return null;
+    }
+
+    private ChessPiece getPromotionPiece(String pieceString, ChessGame.TeamColor teamColor){
+        ChessPiece promotionPiece;
+        pieceString = pieceString.toLowerCase();
+        switch(pieceString){
+            case "queen" -> promotionPiece = new ChessPiece(teamColor, ChessPiece.PieceType.QUEEN);
+            case "rook" -> promotionPiece = new ChessPiece(teamColor, ChessPiece.PieceType.ROOK);
+            case "knight" -> promotionPiece = new ChessPiece(teamColor, ChessPiece.PieceType.KNIGHT);
+            case "bishop" -> promotionPiece = new ChessPiece(teamColor, ChessPiece.PieceType.BISHOP);
+            default -> promotionPiece = null;
+        }
+        return promotionPiece;
     }
 
     private static ChessPosition makePosition(String string) {
