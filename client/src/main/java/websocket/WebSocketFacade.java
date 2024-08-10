@@ -21,6 +21,7 @@ public class WebSocketFacade extends Endpoint {
 
     Session session;
     private final ChessGame.TeamColor teamColor;
+    private ChessGame chessGame;
 
     public WebSocketFacade(String url, ChessGame.TeamColor teamColor) throws IOException {
         try {
@@ -54,6 +55,10 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
+    public ChessGame getChessGame() {
+        return chessGame;
+    }
+
     private void receiveNotification(String message) {
         NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
         System.out.println(notificationMessage.getMessage());
@@ -62,6 +67,7 @@ public class WebSocketFacade extends Endpoint {
     private void receiveLoadGame(String message) {
         LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
         GameData game = loadGameMessage.getGame();
+        chessGame = game.game();
         String board = displayBoard(game, teamColor);
         System.out.println('\n'+board);
     }

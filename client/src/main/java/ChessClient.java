@@ -1,5 +1,7 @@
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import model.GameData;
 import responses.LoginResponse;
 import responses.RegisterResponse;
@@ -8,8 +10,10 @@ import websocket.WebSocketFacade;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
-import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static ui.EscapeSequences.*;
 
@@ -22,6 +26,7 @@ public class ChessClient {
     private int joinedGame;
     private WebSocketFacade ws;
     private final int port;
+    private ChessGame.TeamColor color;
 
     public ChessClient(int port) {
         server = new ServerFacade("http://localhost:" + port);
@@ -51,6 +56,7 @@ public class ChessClient {
                     case "observe" -> observe(params);
                     case "leave" -> leave();
                     case "redraw" -> redraw();
+                    case "move" -> move(params);
                     default -> "Invalid Command. Type help to see valid commands";
                 };
             }
@@ -61,11 +67,11 @@ public class ChessClient {
     }
 
     public String register(String... params) throws IOException {
-        if(postLogin){
-            return "You're already logged in";
-        }
         if (inGame) {
             return "Leave your game first to complete this request";
+        }
+        if(postLogin){
+            return "You're already logged in";
         }
         try{
             if(params.length == 3){
@@ -92,11 +98,11 @@ public class ChessClient {
     }
 
     public String login(String... params) throws IOException {
-        if(postLogin){
-            return "You're already logged in";
-        }
         if (inGame) {
             return "Leave your game first to complete this request";
+        }
+        if(postLogin){
+            return "You're already logged in";
         }
         try{
             if(params.length == 2){
@@ -122,11 +128,11 @@ public class ChessClient {
     }
 
     public String logout(String authToken) throws IOException {
-        if(!postLogin){
-            return "You are not logged in";
-        }
         if (inGame) {
             return "Leave your game first to complete this request";
+        }
+        if(!postLogin){
+            return "You are not logged in";
         }
         try{
             server.logout(authToken);
@@ -145,11 +151,11 @@ public class ChessClient {
     }
 
     public String listGames(String authToken) throws IOException {
-        if(!postLogin){
-            return "Login first to see current games";
-        }
         if (inGame) {
             return "Leave your game first to complete this request";
+        }
+        if(!postLogin){
+            return "Login first to see current games";
         }
         try{
             var gameResponse = server.listGames(authToken);
@@ -178,11 +184,11 @@ public class ChessClient {
     }
 
     public String createGame(String... params) throws IOException {
-        if(!postLogin){
-            return "Login first to create a game";
-        }
         if (inGame) {
             return "Leave your game first to complete this request";
+        }
+        if(!postLogin){
+            return "Login first to create a game";
         }
         try{
             if(params.length == 1){
@@ -204,11 +210,11 @@ public class ChessClient {
     }
 
     public String joinGame(String... params) throws IOException {
-        if(!postLogin){
-            return "Login first to join a game";
-        }
         if (inGame) {
             return "Leave your game first to complete this request";
+        }
+        if(!postLogin){
+            return "Login first to join a game";
         }
         try{
             if(params.length == 2){
@@ -235,9 +241,11 @@ public class ChessClient {
                 }
                 server.joinGame(authToken, teamColor, gameData.gameID());
                 ws = new WebSocketFacade("http://localhost:" + port, teamColor);
+                ws.joinGame(authToken, gameData.gameID());
                 inGame = true;
                 postLogin = false;
                 joinedGame = desiredID;
+                color = teamColor;
                 Thread.sleep(500);
                 return "Joined game " + desiredID +" successfully.";
             }
@@ -331,7 +339,7 @@ public class ChessClient {
 
     public String redraw() throws IOException {
         if (!inGame) {
-            return "Join a game first to complete this request";
+            return "Join a game first to redraw the board";
         }
         GameData gameData = getGameData(joinedGame);
         if(Objects.equals(Objects.requireNonNull(gameData).whiteUsername(), user)){
@@ -346,6 +354,54 @@ public class ChessClient {
                     //"                              "+ RESET_BG_COLOR + '\n';
                     //displayBoard(gameData, ChessGame.TeamColor.BLACK);
         }
+    }
+
+    public String move(String... params) throws IOException {
+        if(!inGame){
+            return "Join a game first to make a move";
+        }
+        String fromString = params[0];
+        String toString = params[1];
+        if(invalidMoveFormat(fromString, toString)){
+            return "Move formated incorrectly. Please enter your moves in the format [a-h][1-8] like c4, for instance";
+        }
+        ChessGame chessGame = ws.getChessGame();
+        ChessPosition fromPos = makePosition(fromString);
+        ChessPosition toPos = makePosition(toString);
+        Collection<ChessMove> validMoves = chessGame.validMoves(fromPos);
+        ChessMove move = new ChessMove(fromPos, toPos, null);
+        if(!validMoves.contains(move)){
+            return "Move is not possible";
+        }
+        return null;
+    }
+
+    private static ChessPosition makePosition(String string) {
+        char row = string.charAt(1);
+        char colChar = string.charAt(0);
+        int col = 0;
+        switch(colChar){
+            case 'a' -> col = 1;
+            case 'b' -> col = 2;
+            case 'c' -> col = 3;
+            case 'd' -> col = 4;
+            case 'e' -> col = 5;
+            case 'f' -> col = 6;
+            case 'g' -> col = 7;
+            case 'h' -> col = 8;
+        }
+        return new ChessPosition(row, col);
+    }
+
+    private static boolean invalidMoveFormat(String fromString, String toString) {
+        String regex = "[a-h][1-8]";
+        Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+        Matcher matchFrom = pattern.matcher(fromString);
+        Matcher matchTo = pattern.matcher(toString);
+        if(!matchFrom.find()){
+            return false;
+        }
+        else return matchTo.find();
     }
 
     private static GameData getGameData(int desiredID) throws IOException {
