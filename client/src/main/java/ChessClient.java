@@ -360,7 +360,7 @@ public class ChessClient {
         }
     }
 
-    public String move(String... params) throws IOException {
+    public String move(String... params) throws IOException{
         if(!inGame){
             return "Join a game first to make a move";
         }
@@ -398,7 +398,12 @@ public class ChessClient {
             return "Move is not possible";
         }
         ws.makeMove(authToken, gameIdent, move);
-        return null;
+        try{
+            Thread.sleep(500);
+        } catch(InterruptedException e){
+            return "process interrupted before completion";
+        }
+        return String.format("Made move %s to %s", fromString, toString);
     }
 
     private ChessPiece getPromotionPiece(String pieceString, ChessGame.TeamColor teamColor){
