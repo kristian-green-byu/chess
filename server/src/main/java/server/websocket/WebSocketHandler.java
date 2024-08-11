@@ -125,7 +125,7 @@ public class WebSocketHandler {
     }
 
     private void sendInvalidMoveError(String username) throws IOException {
-        var error = new ErrorMessage("Error: Move not possible");
+        var error = new ErrorMessage("Error: invalid move");
         connections.sendMessageToUser(username, error);
     }
 
