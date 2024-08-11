@@ -415,7 +415,7 @@ public class ChessClient {
     }
 
     private static ChessPosition makePosition(String string) {
-        char row = string.charAt(1);
+        char rowChar = string.charAt(1);
         char colChar = string.charAt(0);
         int col = 0;
         switch(colChar){
@@ -428,6 +428,7 @@ public class ChessClient {
             case 'g' -> col = 7;
             case 'h' -> col = 8;
         }
+        int row = Character.getNumericValue(rowChar);
         return new ChessPosition(row, col);
     }
 
@@ -439,7 +440,7 @@ public class ChessClient {
         if(!matchFrom.find()){
             return false;
         }
-        else return matchTo.find();
+        else return !matchTo.find();
     }
 
     private static GameData getGameData(int desiredID) throws IOException {

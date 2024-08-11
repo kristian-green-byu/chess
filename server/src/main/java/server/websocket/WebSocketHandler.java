@@ -45,16 +45,13 @@ public class WebSocketHandler {
         switch (command.getCommandType()) {
             case CONNECT -> connect(username, session, gameID);
             case LEAVE -> leave(username);
-            case MAKE_MOVE ->handleMakeMove(command, username, session, gameID);
+            case MAKE_MOVE ->makeMove(message, username, gameID);
         }
     }
 
-    private void handleMakeMove(UserGameCommand command, String username, Session session, int gameID) throws IOException, DataAccessException {
-        MakeMoveCommand makeMove = (MakeMoveCommand) command;
-        makeMove(username, session, gameID, makeMove.getMove());
-    }
-
-    private void makeMove(String username, Session session, Integer gameID, ChessMove move) throws IOException, DataAccessException {
+    private void makeMove(String message, String username, Integer gameID) throws IOException, DataAccessException {
+        MakeMoveCommand command = new Gson().fromJson(message, MakeMoveCommand.class);
+        ChessMove move = command.getMove();
         GameData game = gameDAO.getGame(gameID);
         if(game==null){
             gameNoExistError(username);
@@ -96,15 +93,40 @@ public class WebSocketHandler {
         gameDAO.updateGame(game.gameName(), moveColor, game);
         var loadGame = new LoadGameMessage(game);
         connections.broadcast("", loadGame);
-        //String notifyString = String.format("%s has moved from %s to %s.", username, )
-        //var moveNotify = new NotificationMessage()
+        var moveNotify = getMoveNotification(username, move);
+        connections.broadcast(username, moveNotify);
 
+    }
+
+    private static NotificationMessage getMoveNotification(String username, ChessMove move) {
+        int startRow = move.getStartPosition().getRow();
+        int startCol = move.getStartPosition().getColumn();
+        String startCombo = makePositionOutput(startRow, startCol);
+        int endRow = move.getEndPosition().getRow();
+        int endCol = move.getEndPosition().getColumn();
+        String endCombo = makePositionOutput(endRow, endCol);
+        String notifyString = String.format("%s has moved from %s to %s.", username, startCombo, endCombo);
+        return new NotificationMessage(notifyString);
+    }
+
+    private static String makePositionOutput(int row, int col) {
+        char colChar = 'x';
+        switch(col){
+            case 1 -> colChar = 'a';
+            case 2 -> colChar = 'b';
+            case 3 -> colChar = 'c';
+            case 4 -> colChar = 'd';
+            case 5 -> colChar = 'e';
+            case 6 -> colChar = 'f';
+            case 7 -> colChar = 'g';
+            case 8 -> colChar = 'h';
+        }
+        return colChar + Integer.toString(row);
     }
 
     private void sendInvalidMoveError(String username) throws IOException {
         var error = new ErrorMessage("Error: Move not possible");
         connections.sendMessageToUser(username, error);
-        return;
     }
 
     private void sendUserNotInGameError(String username) throws IOException {
