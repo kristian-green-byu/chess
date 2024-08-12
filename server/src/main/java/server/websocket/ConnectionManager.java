@@ -12,8 +12,8 @@ import com.google.gson.Gson;
 public class ConnectionManager {
     public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
-    public void add(String username, Session session){
-        Connection connection = new Connection(username, session);
+    public void add(String username, Session session, int gameID){
+        Connection connection = new Connection(username, session, gameID);
         connections.put(username, connection);
     }
 
@@ -21,11 +21,11 @@ public class ConnectionManager {
         connections.remove(username);
     }
 
-    public void broadcast(String excludeUsername, ServerMessage serverMessage) throws IOException {
+    public void broadcast(String excludeUsername, ServerMessage serverMessage, int gameID) throws IOException {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
-                if (!c.username.equals(excludeUsername)) {
+                if (!c.username.equals(excludeUsername) && gameID==c.gameID) {
                     c.send(new Gson().toJson(serverMessage));
                 }
             } else {

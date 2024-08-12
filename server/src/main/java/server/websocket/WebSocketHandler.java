@@ -85,9 +85,9 @@ public class WebSocketHandler {
         }
         gameDAO.updateGame(username, moveColor, game);
         var loadGame = new LoadGameMessage(game);
-        connections.broadcast("", loadGame);
+        connections.broadcast("", loadGame, gameID);
         var moveNotify = getMoveNotification(username, move);
-        connections.broadcast(username, moveNotify);
+        connections.broadcast(username, moveNotify, gameID);
 
         //see if move put opponent in checkmate, stalemate, or check
         ChessGame.TeamColor opponentColor=ChessGame.TeamColor.BLACK;
@@ -99,19 +99,19 @@ public class WebSocketHandler {
         if(game.game().isInCheckmate(opponentColor)){
             String checkmateNotifyString = String.format("%s checkmated %s! Game over. %s won!", username, opponentUsername, username);
             var checkmateNotify = new NotificationMessage(checkmateNotifyString);
-            connections.broadcast("", checkmateNotify);
+            connections.broadcast("", checkmateNotify, gameID);
             game.game().end();
         }
         else if(game.game().isInStalemate(opponentColor)){
             String checkmateNotifyString = String.format("%s and %s are in a stalemate! Game over.", username, opponentUsername);
             var checkmateNotify = new NotificationMessage(checkmateNotifyString);
-            connections.broadcast("", checkmateNotify);
+            connections.broadcast("", checkmateNotify, gameID);
             game.game().end();
         }
         else if(game.game().isInCheck(opponentColor)){
             String checkmateNotifyString = String.format("%s put %s in check!", username, opponentUsername);
             var checkmateNotify = new NotificationMessage(checkmateNotifyString);
-            connections.broadcast("", checkmateNotify);
+            connections.broadcast("", checkmateNotify, gameID);
         }
     }
 
@@ -170,7 +170,7 @@ public class WebSocketHandler {
             return;
         }
         Integer gameID = command.getGameID();
-        connections.add(username, session);
+        connections.add(username, session, gameID);
         GameData game = gameDAO.getGame(gameID);
         if(game==null){
             gameNoExistError(username);
@@ -180,7 +180,7 @@ public class WebSocketHandler {
         connections.sendMessageToUser(username, loadGame);
         var message = String.format("%s joined the game", username);
         var notification = new NotificationMessage(message);
-        connections.broadcast(username, notification);
+        connections.broadcast(username, notification, gameID);
     }
 
     private void resign(UserGameCommand command, Session session) throws IOException, DataAccessException {
@@ -213,7 +213,7 @@ public class WebSocketHandler {
         }
         String resignMessage = String.format("%s has resigned. Game over. %s won!", username, otherUser);
         NotificationMessage notification = new NotificationMessage(resignMessage);
-        connections.broadcast("", notification);
+        connections.broadcast("", notification, gameID);
     }
 
     private boolean checkIfInGame(ChessGame.TeamColor color, GameData game, String username) throws IOException {
@@ -265,7 +265,7 @@ public class WebSocketHandler {
         connections.remove(username);
         var message = String.format("%s left the game", username);
         var notification = new NotificationMessage(message);
-        connections.broadcast("", notification);
+        connections.broadcast("", notification, gameID);
     }
 
     private static ChessGame.TeamColor getUserColor(GameData game, String username) {
