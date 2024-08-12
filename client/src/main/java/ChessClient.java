@@ -24,7 +24,7 @@ public class ChessClient {
     private static String authToken;
     private boolean postLogin;
     private boolean inGame;
-    private String user;
+
     private int joinedGame;
     private WebSocketFacade ws;
     private final int port;
@@ -35,7 +35,6 @@ public class ChessClient {
         server = new ServerFacade("http://localhost:" + port);
         postLogin = false;
         inGame = false;
-        user = null;
         joinedGame = 0;
         this.port = port;
     }
@@ -61,6 +60,7 @@ public class ChessClient {
                     case "redraw" -> redraw();
                     case "move" -> move(params);
                     case "resign" -> resign();
+                    case "highlight" -> highlight(params);
                     default -> "Invalid Command. Type help to see valid commands";
                 };
             }
@@ -85,7 +85,6 @@ public class ChessClient {
                 RegisterResponse registerResponse = server.register(username, password, email);
                 authToken = registerResponse.authToken();
                 postLogin = true;
-                user = username;
                 return "Registration successful. You are now logged in as "+username+"\nType help to see new commands";
             }
             else{
@@ -115,7 +114,6 @@ public class ChessClient {
                 LoginResponse loginResponse = server.login(username, password);
                 authToken = loginResponse.authToken();
                 postLogin = true;
-                user = username;
                 return "You are now logged in as "+username+"\nType help to see new commands";
             }
             else {
@@ -141,7 +139,6 @@ public class ChessClient {
         try{
             server.logout(authToken);
             postLogin = false;
-            user = null;
             return "Logged out successfully";
         }
         catch (Exception e){
@@ -296,11 +293,11 @@ public class ChessClient {
     }
 
     public String observe(String... params) throws IOException {
-        if(!postLogin){
-            return "Login first to observe a game";
-        }
         if (inGame) {
             return "Leave your game first to complete this request";
+        }
+        if(!postLogin){
+            return "Login first to observe a game";
         }
         try{
             if(params.length == 1){
@@ -368,7 +365,7 @@ public class ChessClient {
         }
         String fromString = params[0];
         String toString = params[1];
-        if(invalidMoveFormat(fromString, toString)){
+        if(invalidMoveFormat(fromString) || invalidMoveFormat(toString)){
             return "Move formated incorrectly. Please enter your moves in the format [a-h][1-8] like c4, for instance";
         }
         ChessGame chessGame = ws.getChessGame();
@@ -419,6 +416,26 @@ public class ChessClient {
         return "Resigned successfully.";
     }
 
+    public String highlight(String... params) throws IOException{
+        String pieceCord = params[0];
+        if(invalidMoveFormat(pieceCord)){
+            return "Coordinate formated incorrectly. " +
+                    "Please enter your coordinate in the format [a-h][1-8] like c4, for instance";
+        }
+        ChessPosition piecePos = makePosition(pieceCord);
+        ChessGame chessGame = ws.getChessGame();
+        GameData gameData = getGameData(joinedGame);
+        Collection<ChessMove> validMoves = chessGame.validMoves(piecePos);
+        ws.displayLegalMoves(gameData, color, validMoves);
+        ChessPiece piece = chessGame.getBoard().getPiece(piecePos);
+        try{
+            Thread.sleep(500);
+        } catch(InterruptedException e){
+            return "process interrupted before completion";
+        }
+        return String.format("Board highlighted for the %s on %s",piece.getPieceType(), pieceCord);
+    }
+
     private ChessPiece getPromotionPiece(String pieceString, ChessGame.TeamColor teamColor){
         ChessPiece promotionPiece;
         pieceString = pieceString.toLowerCase();
@@ -450,15 +467,11 @@ public class ChessClient {
         return new ChessPosition(row, col);
     }
 
-    private static boolean invalidMoveFormat(String fromString, String toString) {
+    private static boolean invalidMoveFormat(String string) {
         String regex = "[a-h][1-8]";
         Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
-        Matcher matchFrom = pattern.matcher(fromString);
-        Matcher matchTo = pattern.matcher(toString);
-        if(!matchFrom.find()){
-            return false;
-        }
-        else return !matchTo.find();
+        Matcher match = pattern.matcher(string);
+        return !match.find();
     }
 
     private static GameData getGameData(int desiredID) throws IOException {

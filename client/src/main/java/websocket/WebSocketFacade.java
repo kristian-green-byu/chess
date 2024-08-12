@@ -3,6 +3,7 @@ package websocket;
 import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import model.GameData;
 import websocket.commands.MakeMoveCommand;
@@ -16,6 +17,7 @@ import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 
 import static ui.EscapeSequences.*;
 
@@ -98,22 +100,32 @@ public class WebSocketFacade extends Endpoint {
         System.out.print(SET_TEXT_BLINKING + RESET_TEXT_COLOR + "\n" + RESET_TEXT_BOLD_FAINT + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
-    public void redrawBoard(GameData game, ChessGame.TeamColor teamColor) throws IOException {
-        if(displayObserverBoard(game, teamColor)){
+    public void redrawBoard(GameData game, ChessGame.TeamColor teamColor) {
+        if(displayObserverBoard(game, teamColor, null, false)){
             return;
         }
-        displayObserverBoard(game, teamColor);
-        String board = displayBoard(game, teamColor);
+        displayObserverBoard(game, teamColor, null, false);
+        String board = displayBoard(game, teamColor, null, false);
         System.out.print(ERASE_SCREEN);
         System.out.println('\n'+board);
     }
 
-    private boolean displayObserverBoard(GameData game, ChessGame.TeamColor teamColor) {
+    public void displayLegalMoves(GameData game, ChessGame.TeamColor teamColor, Collection<ChessMove> moves) {
+        if(displayObserverBoard(game, teamColor, moves, true)){
+            return;
+        }
+        displayObserverBoard(game, teamColor, moves, true);
+        String board = displayBoard(game, teamColor, moves, true);
+        System.out.print(ERASE_SCREEN);
+        System.out.println('\n'+board);
+    }
+
+    private boolean displayObserverBoard(GameData game, ChessGame.TeamColor teamColor, Collection<ChessMove> moves, boolean highlight) {
         if(teamColor == null){
-            String board1 = displayBoard(game, ChessGame.TeamColor.WHITE);
+            String board1 = displayBoard(game, ChessGame.TeamColor.WHITE, moves, highlight);
             System.out.print(ERASE_SCREEN);
             System.out.println('\n'+board1);
-            String board2 = displayBoard(game, ChessGame.TeamColor.BLACK);
+            String board2 = displayBoard(game, ChessGame.TeamColor.BLACK, moves, highlight);
             System.out.print(ERASE_SCREEN);
             System.out.println('\n'+board2);
             return true;
@@ -125,10 +137,10 @@ public class WebSocketFacade extends Endpoint {
         LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
         GameData game = loadGameMessage.getGame();
         chessGame = game.game();
-        if (displayObserverBoard(game, teamColor)){
+        if (displayObserverBoard(game, teamColor, null, false)){
             return;
         }
-        String board = displayBoard(game, teamColor);
+        String board = displayBoard(game, teamColor, null, false);
         System.out.print(ERASE_SCREEN);
         System.out.println('\n'+board);
     }
@@ -139,7 +151,7 @@ public class WebSocketFacade extends Endpoint {
         System.out.println(SET_TEXT_COLOR_RED+'\n'+errorMessage.getErrorMessage());
     }
 
-    private String displayBoard(GameData gameData, ChessGame.TeamColor color){
+    private String displayBoard(GameData gameData, ChessGame.TeamColor color, Collection<ChessMove> validMoves, boolean highlight){
         ChessGame game = gameData.game();
         ChessBoard board = game.getBoard();
         String boardString = board.toString();
@@ -161,11 +173,30 @@ public class WebSocketFacade extends Endpoint {
         result.append(topBorder);
         for (var line : boardString.split("\n")) {
             result.append(SET_BG_COLOR_WHITE).append(SET_TEXT_COLOR_BLACK).append(' ').append(colNum).append(' ');
+            int rowNum = 1;
             for(var character : line.toCharArray()) {
+                ChessPosition pos = new ChessPosition(colNum, rowNum);
+                boolean squareIsValidMove = false;
+                if(highlight){
+                    for(ChessMove move : validMoves){
+                        if (move.getEndPosition().equals(pos)) {
+                            squareIsValidMove = true;
+                            break;
+                        }
+                    }
+                }
                 if(character == '|'){
                     continue;
                 }
-                if(alt){
+                if(alt&&squareIsValidMove){
+                    result.append(SET_BG_COLOR_DARK_GREEN);
+                    alt = false;
+                }
+                else if(squareIsValidMove){
+                    result.append(SET_BG_COLOR_GREEN);
+                    alt = true;
+                }
+                else if(alt){
                     result.append(SET_BG_COLOR_DARK_GREY);
                     alt = false;
                 }
@@ -213,6 +244,7 @@ public class WebSocketFacade extends Endpoint {
                 else if(character == 'P'){
                     result.append(SET_TEXT_COLOR_WHITE + WHITE_PAWN);
                 }
+                rowNum ++;
             }
             result.append(SET_BG_COLOR_WHITE).append(SET_TEXT_COLOR_BLACK).append(' ').append(colNum).append(' ');
             if(color == ChessGame.TeamColor.WHITE){
