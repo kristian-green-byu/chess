@@ -410,7 +410,7 @@ public class ChessClient {
         } catch(InterruptedException e){
             return "process interrupted before completion";
         }
-        return String.format("Made move %s to %s", fromString, toString);
+        return "";
     }
 
     public String resign() throws IOException {

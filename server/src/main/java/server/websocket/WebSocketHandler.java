@@ -66,7 +66,7 @@ public class WebSocketHandler {
         }
         // validate move is in valid moves for requested start position
         Collection<ChessMove> validMoves = game.game().validMoves(move.getStartPosition());
-        if(validMoves.contains(move)){
+        if(!validMoves.contains(move)){
             sendInvalidMoveError(username);
             return;
         }
@@ -255,11 +255,13 @@ public class WebSocketHandler {
         ChessGame.TeamColor color = getUserColor(game, username);
         GameData newGame = new GameData(gameID, game.whiteUsername(), null, game.gameName(), game.game());
         String otherUser = game.whiteUsername();
+        ChessGame.TeamColor otherColor = ChessGame.TeamColor.WHITE;
         if(color==ChessGame.TeamColor.WHITE){
             newGame = new GameData(gameID, null, game.blackUsername(), game.gameName(), game.game());
             otherUser = game.blackUsername();
+            otherColor = ChessGame.TeamColor.BLACK;
         }
-        gameDAO.updateGame(otherUser, color, newGame);
+        gameDAO.updateGame(otherUser, otherColor, newGame);
         connections.remove(username);
         var message = String.format("%s left the game", username);
         var notification = new NotificationMessage(message);
