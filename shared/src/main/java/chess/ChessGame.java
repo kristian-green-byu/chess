@@ -17,6 +17,7 @@ public class ChessGame {
     private boolean rwCastlePossible;
     private boolean lbCastlePossible;
     private boolean rbCastlePossible;
+    private boolean gameOver = false;
     private Collection<ChessPosition> doubleMovePawns;
 
     public ChessGame() {
@@ -37,6 +38,14 @@ public class ChessGame {
         this.lbCastlePossible = true;
         this.rbCastlePossible = true;
         this.doubleMovePawns = new ArrayList<>();
+    }
+
+    public void end(){
+        gameOver=true;
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
     }
 
     public TeamColor getTeamTurn() {

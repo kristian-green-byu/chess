@@ -71,6 +71,11 @@ public class WebSocketHandler {
                 return;
             }
         }
+        if(game.game().isGameOver()){
+            var error = new ErrorMessage("The game is over! You can no longer move.");
+            connections.sendMessageToUser(username, error);
+            return;
+        }
         // validate move is in valid moves for requested start position
         Collection<ChessMove> validMoves = game.game().validMoves(move.getStartPosition());
         if(!validMoves.contains(move)){
@@ -90,12 +95,36 @@ public class WebSocketHandler {
             sendInvalidMoveError(username);
             return;
         }
-        gameDAO.updateGame(game.gameName(), moveColor, game);
+        gameDAO.updateGame(username, moveColor, game);
         var loadGame = new LoadGameMessage(game);
         connections.broadcast("", loadGame);
         var moveNotify = getMoveNotification(username, move);
         connections.broadcast(username, moveNotify);
 
+        //see if move put opponent in checkmate, stalemate, or check
+        ChessGame.TeamColor opponentColor=ChessGame.TeamColor.BLACK;
+        String opponentUsername = game.blackUsername();
+        if(moveColor==ChessGame.TeamColor.BLACK){
+            opponentColor=ChessGame.TeamColor.WHITE;
+            opponentUsername=game.whiteUsername();
+        }
+        if(game.game().isInCheckmate(opponentColor)){
+            String checkmateNotifyString = String.format("%s checkmated %s! Game over. %s won!", username, opponentUsername, username);
+            var checkmateNotify = new NotificationMessage(checkmateNotifyString);
+            connections.broadcast("", checkmateNotify);
+            game.game().end();
+        }
+        else if(game.game().isInStalemate(opponentColor)){
+            String checkmateNotifyString = String.format("%s and %s are in a stalemante! Game over.", username, opponentUsername);
+            var checkmateNotify = new NotificationMessage(checkmateNotifyString);
+            connections.broadcast("", checkmateNotify);
+            game.game().end();
+        }
+        else if(game.game().isInCheck(opponentColor)){
+            String checkmateNotifyString = String.format("%s put %s in check!", username, opponentUsername);
+            var checkmateNotify = new NotificationMessage(checkmateNotifyString);
+            connections.broadcast("", checkmateNotify);
+        }
     }
 
     private static NotificationMessage getMoveNotification(String username, ChessMove move) {
