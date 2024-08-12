@@ -399,6 +399,7 @@ public class ChessClient {
                     return "You entered an invalid promotion piece";
                 }
                 move = new ChessMove(fromPos, toPos, promotionPiece.getPieceType());
+                break;
             }
         }
         if(!validMoves.contains(move)){
