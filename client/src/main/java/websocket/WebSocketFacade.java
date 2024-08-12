@@ -98,17 +98,34 @@ public class WebSocketFacade extends Endpoint {
         System.out.print(SET_TEXT_BLINKING + RESET_TEXT_COLOR + "\n" + RESET_TEXT_BOLD_FAINT + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
-    private void receiveLoadGame(String message) {
-        LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
-        GameData game = loadGameMessage.getGame();
-        chessGame = game.game();
-        if(teamColor==null){
+    public void redrawBoard(GameData game, ChessGame.TeamColor teamColor) throws IOException {
+        if(displayObserverBoard(game, teamColor)){
+            return;
+        }
+        displayObserverBoard(game, teamColor);
+        String board = displayBoard(game, teamColor);
+        System.out.print(ERASE_SCREEN);
+        System.out.println('\n'+board);
+    }
+
+    private boolean displayObserverBoard(GameData game, ChessGame.TeamColor teamColor) {
+        if(teamColor == null){
             String board1 = displayBoard(game, ChessGame.TeamColor.WHITE);
             System.out.print(ERASE_SCREEN);
             System.out.println('\n'+board1);
             String board2 = displayBoard(game, ChessGame.TeamColor.BLACK);
             System.out.print(ERASE_SCREEN);
             System.out.println('\n'+board2);
+            return true;
+        }
+        return false;
+    }
+
+    private void receiveLoadGame(String message) {
+        LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
+        GameData game = loadGameMessage.getGame();
+        chessGame = game.game();
+        if (displayObserverBoard(game, teamColor)){
             return;
         }
         String board = displayBoard(game, teamColor);

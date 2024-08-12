@@ -353,18 +353,13 @@ public class ChessClient {
             return "Join a game first to redraw the board";
         }
         GameData gameData = getGameData(joinedGame);
-        if(Objects.equals(Objects.requireNonNull(gameData).whiteUsername(), user)){
-            return "Redrawing the board...\n"; //displayBoard(gameData, ChessGame.TeamColor.WHITE);
+        ws.redrawBoard(gameData, color);
+        try{
+            Thread.sleep(500);
+        } catch(InterruptedException e){
+            return "process interrupted before completion";
         }
-        else if(Objects.equals(Objects.requireNonNull(gameData).blackUsername(), user)){
-            return "Redrawing the board...\n"; //displayBoard(gameData, ChessGame.TeamColor.BLACK);
-        }
-        else {
-            return "Redrawing the board...\n"; //displayBoard(gameData, ChessGame.TeamColor.WHITE)+
-                    //SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLACK+
-                    //"                              "+ RESET_BG_COLOR + '\n';
-                    //displayBoard(gameData, ChessGame.TeamColor.BLACK);
-        }
+        return "Board redrawn";
     }
 
     public String move(String... params) throws IOException{

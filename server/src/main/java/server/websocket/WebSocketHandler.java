@@ -184,7 +184,11 @@ public class WebSocketHandler {
             connections.broadcast(username, notification, gameID);
             return;
         }
-        var message = String.format("%s joined the game", username);
+        ChessGame.TeamColor playerColor = ChessGame.TeamColor.WHITE;
+        if(Objects.equals(game.blackUsername(), username)){
+            playerColor = ChessGame.TeamColor.BLACK;
+        }
+        var message = String.format("%s joined the game as %s", username, playerColor);
         var notification = new NotificationMessage(message);
         connections.broadcast(username, notification, gameID);
     }
