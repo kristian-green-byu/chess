@@ -244,7 +244,8 @@ public class ChessClient {
                     return "Invalid game number. Type list to see possible game numbers";
                 }
                 server.joinGame(authToken, teamColor, gameData.gameID());
-                ws = new WebSocketFacade("http://localhost:" + port, teamColor);
+                ws = new WebSocketFacade("http://localhost:" + port);
+                ws.setTeamColor(teamColor);
                 ws.joinGame(authToken, gameData.gameID());
                 inGame = true;
                 postLogin = false;
@@ -314,11 +315,10 @@ public class ChessClient {
                 inGame = true;
                 postLogin = false;
                 joinedGame = desiredID;
-                return "Observing game "+desiredID+"\nType help to see new commands."+"\n\n"+
-                        //displayBoard(gameData, ChessGame.TeamColor.WHITE)+
-                        SET_BG_COLOR_BLACK + SET_TEXT_COLOR_BLACK+
-                        "                              "+ RESET_BG_COLOR + '\n';
-                        //displayBoard(gameData, ChessGame.TeamColor.BLACK);
+                ws = new WebSocketFacade("http://localhost:" + port);
+                ws.joinGame(authToken, gameData.gameID());
+                Thread.sleep(500);
+                return String.format("Observing game %d",desiredID);
             }
             else{
                 return "Expected: <gameNumber>";

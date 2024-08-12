@@ -22,10 +22,10 @@ import static ui.EscapeSequences.*;
 public class WebSocketFacade extends Endpoint {
 
     Session session;
-    private final ChessGame.TeamColor teamColor;
+    private ChessGame.TeamColor teamColor = null;
     private ChessGame chessGame;
 
-    public WebSocketFacade(String url, ChessGame.TeamColor teamColor) throws IOException {
+    public WebSocketFacade(String url) throws IOException {
         try {
             url = url.replace("http", "ws");
             URI wsUri = new URI(url + "/ws");
@@ -45,6 +45,9 @@ public class WebSocketFacade extends Endpoint {
         } catch (DeploymentException | URISyntaxException e) {
             throw new IOException(e.getMessage());
         }
+    }
+
+    public void setTeamColor(ChessGame.TeamColor teamColor) {
         this.teamColor = teamColor;
     }
 
@@ -91,7 +94,7 @@ public class WebSocketFacade extends Endpoint {
     private void receiveNotification(String message) {
         NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
         System.out.print(ERASE_LINE);
-        System.out.println(SET_TEXT_COLOR_BLUE+'\n'+notificationMessage.getMessage());
+        System.out.println(SET_TEXT_COLOR_MAGENTA+'\n'+notificationMessage.getMessage());
         System.out.print(SET_TEXT_BLINKING + RESET_TEXT_COLOR + "\n" + RESET_TEXT_BOLD_FAINT + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
@@ -99,6 +102,15 @@ public class WebSocketFacade extends Endpoint {
         LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
         GameData game = loadGameMessage.getGame();
         chessGame = game.game();
+        if(teamColor==null){
+            String board1 = displayBoard(game, ChessGame.TeamColor.WHITE);
+            System.out.print(ERASE_SCREEN);
+            System.out.println('\n'+board1);
+            String board2 = displayBoard(game, ChessGame.TeamColor.BLACK);
+            System.out.print(ERASE_SCREEN);
+            System.out.println('\n'+board2);
+            return;
+        }
         String board = displayBoard(game, teamColor);
         System.out.print(ERASE_SCREEN);
         System.out.println('\n'+board);
@@ -107,8 +119,7 @@ public class WebSocketFacade extends Endpoint {
     private void receiveError(String message) {
         ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
         System.out.print(ERASE_LINE);
-        System.out.println(SET_TEXT_COLOR_BLUE+'\n'+errorMessage.getErrorMessage());
-        System.out.print(SET_TEXT_BLINKING + RESET_TEXT_COLOR + "\n" + RESET_TEXT_BOLD_FAINT + ">>> " + SET_TEXT_COLOR_GREEN);
+        System.out.println(SET_TEXT_COLOR_RED+'\n'+errorMessage.getErrorMessage());
     }
 
     private String displayBoard(GameData gameData, ChessGame.TeamColor color){

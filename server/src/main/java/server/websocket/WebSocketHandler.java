@@ -178,6 +178,12 @@ public class WebSocketHandler {
         }
         var loadGame = new LoadGameMessage(game);
         connections.sendMessageToUser(username, loadGame);
+        if(!game.whiteUsername().equals(username) && !game.blackUsername().equals(username)){
+            var message = String.format("%s is observing the game", username);
+            var notification = new NotificationMessage(message);
+            connections.broadcast(username, notification, gameID);
+            return;
+        }
         var message = String.format("%s joined the game", username);
         var notification = new NotificationMessage(message);
         connections.broadcast(username, notification, gameID);
