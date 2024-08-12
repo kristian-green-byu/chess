@@ -90,7 +90,9 @@ public class WebSocketFacade extends Endpoint {
 
     private void receiveNotification(String message) {
         NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
-        System.out.println(notificationMessage.getMessage());
+        System.out.print(ERASE_LINE);
+        System.out.println(SET_TEXT_COLOR_BLUE+'\n'+notificationMessage.getMessage());
+        System.out.print(SET_TEXT_BLINKING + RESET_TEXT_COLOR + "\n" + RESET_TEXT_BOLD_FAINT + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
     private void receiveLoadGame(String message) {
@@ -98,12 +100,15 @@ public class WebSocketFacade extends Endpoint {
         GameData game = loadGameMessage.getGame();
         chessGame = game.game();
         String board = displayBoard(game, teamColor);
+        System.out.print(ERASE_SCREEN);
         System.out.println('\n'+board);
     }
 
     private void receiveError(String message) {
         ErrorMessage errorMessage = new Gson().fromJson(message, ErrorMessage.class);
-        System.out.println(errorMessage.getErrorMessage());
+        System.out.print(ERASE_LINE);
+        System.out.println(SET_TEXT_COLOR_BLUE+'\n'+errorMessage.getErrorMessage());
+        System.out.print(SET_TEXT_BLINKING + RESET_TEXT_COLOR + "\n" + RESET_TEXT_BOLD_FAINT + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
     private String displayBoard(GameData gameData, ChessGame.TeamColor color){

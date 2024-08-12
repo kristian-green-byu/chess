@@ -9,20 +9,19 @@ public class Repl {
     }
     public void run(){
         System.out.println("Welcome to CS240 Chess. Type help to receive a list of commands.");
-
+        printPrompt();
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equals("quit")){
-                printPrompt();
                 String line = scanner.nextLine();
-
                 try {
                     result = client.eval(line);
                     System.out.print(SET_TEXT_COLOR_BLUE + result);
+                    System.out.println();
+                    printPrompt();
                 } catch (Throwable e) {
                     System.out.print(e.getMessage());
                 }
-            System.out.println();
         }
     }
     private void printPrompt() {
