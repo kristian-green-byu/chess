@@ -60,6 +60,7 @@ public class ChessClient {
                     case "leave" -> leave();
                     case "redraw" -> redraw();
                     case "move" -> move(params);
+                    case "resign" -> resign();
                     default -> "Invalid Command. Type help to see valid commands";
                 };
             }
@@ -406,6 +407,16 @@ public class ChessClient {
         return String.format("Made move %s to %s", fromString, toString);
     }
 
+    public String resign() throws IOException {
+        ws.resign(authToken, gameIdent);
+        try{
+            Thread.sleep(500);
+        } catch(InterruptedException e){
+            return "process interrupted before completion";
+        }
+        return "Resigned successfully.";
+    }
+
     private ChessPiece getPromotionPiece(String pieceString, ChessGame.TeamColor teamColor){
         ChessPiece promotionPiece;
         pieceString = pieceString.toLowerCase();
@@ -494,7 +505,7 @@ public class ChessClient {
                 redraw - refresh the chessboard
                 leave - leave the game
                 move <from> <to> - make a chess move
-                resign - forfeit the game without leaving
+                resign - forfeit the game
                 highlight <coordinate> - see legal moves for a given piece
                 quit - close the chess client
                 help - receive a list of executable commands

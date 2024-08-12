@@ -39,6 +39,7 @@ public class WebSocketHandler {
             case CONNECT -> connect(command, session);
             case LEAVE -> leave(command, session);
             case MAKE_MOVE ->makeMove(message, session);
+            case RESIGN -> resign(command, session);
         }
     }
 
@@ -59,26 +60,15 @@ public class WebSocketHandler {
         }
         //check to make sure that user is in game
         ChessGame.TeamColor moveColor = game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
-        if(moveColor==ChessGame.TeamColor.BLACK){
-            if(!Objects.equals(game.blackUsername(), username)){
-                sendUserNotInGameError(username);
-                return;
-            }
+        if (checkIfInGame(moveColor, game, username)){
+            return;
         }
-        else{
-            if(!Objects.equals(game.whiteUsername(), username)){
-                sendUserNotInGameError(username);
-                return;
-            }
-        }
-        if(game.game().isGameOver()){
-            var error = new ErrorMessage("The game is over! You can no longer move.");
-            connections.sendMessageToUser(username, error);
+        if(checkIfGameOver(game, username)){
             return;
         }
         // validate move is in valid moves for requested start position
         Collection<ChessMove> validMoves = game.game().validMoves(move.getStartPosition());
-        if(!validMoves.contains(move)){
+        if(validMoves.contains(move)){
             sendInvalidMoveError(username);
             return;
         }
@@ -115,7 +105,7 @@ public class WebSocketHandler {
             game.game().end();
         }
         else if(game.game().isInStalemate(opponentColor)){
-            String checkmateNotifyString = String.format("%s and %s are in a stalemante! Game over.", username, opponentUsername);
+            String checkmateNotifyString = String.format("%s and %s are in a stalemate! Game over.", username, opponentUsername);
             var checkmateNotify = new NotificationMessage(checkmateNotifyString);
             connections.broadcast("", checkmateNotify);
             game.game().end();
@@ -195,6 +185,66 @@ public class WebSocketHandler {
         var message = String.format("%s joined the game", username);
         var notification = new NotificationMessage(message);
         connections.broadcast(username, notification);
+    }
+
+    private void resign(UserGameCommand command, Session session) throws IOException, DataAccessException {
+        String username = getUsername(command.getAuthToken());
+        if(username==null){
+            ServerMessage error = new ErrorMessage("Error: User not logged in");
+            session.getRemote().sendString(new Gson().toJson(error));
+            return;
+        }
+        Integer gameID = command.getGameID();
+        GameData game = gameDAO.getGame(gameID);
+        if(game==null){
+            gameNoExistError(username);
+            return;
+        }
+        //check to make sure that user is in game
+        ChessGame.TeamColor color = ChessGame.TeamColor.WHITE;
+        if(Objects.equals(game.blackUsername(), username)){
+            color = ChessGame.TeamColor.BLACK;
+        }
+        if (checkIfInGame(color, game, username)){
+            return;
+        }
+        if(checkIfGameOver(game, username)){
+            return;
+        }
+        game.game().end();
+        gameDAO.updateGame(username, color, game);
+        String otherUser = game.blackUsername();
+        if(color.equals(ChessGame.TeamColor.BLACK)){
+            otherUser = game.whiteUsername();
+        }
+        String resignMessage = String.format("%s has resigned. Game over. %s wins!", username, otherUser);
+        NotificationMessage notification = new NotificationMessage(resignMessage);
+        connections.broadcast("", notification);
+    }
+
+    private boolean checkIfInGame(ChessGame.TeamColor color, GameData game, String username) throws IOException {
+        if(color ==ChessGame.TeamColor.BLACK){
+            if(!Objects.equals(game.blackUsername(), username)){
+                sendUserNotInGameError(username);
+                return true;
+            }
+        }
+        else{
+            if(!Objects.equals(game.whiteUsername(), username)){
+                sendUserNotInGameError(username);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean checkIfGameOver(GameData game, String username) throws IOException {
+        if(game.game().isGameOver()){
+            var error = new ErrorMessage("The game is over! You can no longer move.");
+            connections.sendMessageToUser(username, error);
+            return true;
+        }
+        return false;
     }
 
     private void leave(UserGameCommand command, Session session) throws IOException, DataAccessException {
