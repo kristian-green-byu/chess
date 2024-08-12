@@ -46,9 +46,7 @@ public class WebSocketHandler {
     private void makeMove(String message, Session session) throws IOException, DataAccessException {
         MakeMoveCommand command = new Gson().fromJson(message, MakeMoveCommand.class);
         String username = getUsername(command.getAuthToken());
-        if(username==null){
-            ServerMessage error = new ErrorMessage("Error: User not logged in");
-            session.getRemote().sendString(new Gson().toJson(error));
+        if (userNotLoggedIn(session, username)){
             return;
         }
         Integer gameID = command.getGameID();
@@ -168,9 +166,7 @@ public class WebSocketHandler {
 
     private void connect(UserGameCommand command, Session session) throws IOException, DataAccessException {
         String username = getUsername(command.getAuthToken());
-        if(username==null){
-            ServerMessage error = new ErrorMessage("Error: User not logged in");
-            session.getRemote().sendString(new Gson().toJson(error));
+        if (userNotLoggedIn(session, username)){
             return;
         }
         Integer gameID = command.getGameID();
@@ -189,9 +185,7 @@ public class WebSocketHandler {
 
     private void resign(UserGameCommand command, Session session) throws IOException, DataAccessException {
         String username = getUsername(command.getAuthToken());
-        if(username==null){
-            ServerMessage error = new ErrorMessage("Error: User not logged in");
-            session.getRemote().sendString(new Gson().toJson(error));
+        if (userNotLoggedIn(session, username)){
             return;
         }
         Integer gameID = command.getGameID();
@@ -249,11 +243,44 @@ public class WebSocketHandler {
 
     private void leave(UserGameCommand command, Session session) throws IOException, DataAccessException {
         String username = getUsername(command, session);
-        if (username == null) return;
+        if (userNotLoggedIn(session, username)){
+            return;
+        }
+        Integer gameID = command.getGameID();
+        GameData game = gameDAO.getGame(gameID);
+        if(game==null){
+            gameNoExistError(username);
+            return;
+        }
+        ChessGame.TeamColor color = getUserColor(game, username);
+        GameData newGame = new GameData(gameID, game.whiteUsername(), null, game.gameName(), game.game());
+        String otherUser = game.whiteUsername();
+        if(color==ChessGame.TeamColor.WHITE){
+            newGame = new GameData(gameID, null, game.blackUsername(), game.gameName(), game.game());
+            otherUser = game.blackUsername();
+        }
+        gameDAO.updateGame(otherUser, color, newGame);
         connections.remove(username);
         var message = String.format("%s left the game", username);
         var notification = new NotificationMessage(message);
-        connections.broadcast(null, notification);
+        connections.broadcast("", notification);
+    }
+
+    private static ChessGame.TeamColor getUserColor(GameData game, String username) {
+        ChessGame.TeamColor color = ChessGame.TeamColor.WHITE;
+        if(game.blackUsername().equals(username)){
+            color = ChessGame.TeamColor.BLACK;
+        }
+        return color;
+    }
+
+    private static boolean userNotLoggedIn(Session session, String username) throws IOException {
+        if(username ==null){
+            ServerMessage error = new ErrorMessage("Error: User not logged in");
+            session.getRemote().sendString(new Gson().toJson(error));
+            return true;
+        }
+        return false;
     }
 
     private String getUsername(UserGameCommand command, Session session) throws DataAccessException, IOException {

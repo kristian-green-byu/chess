@@ -339,7 +339,13 @@ public class ChessClient {
         }
         postLogin = true;
         inGame = false;
-        return "Placeholder";
+        ws.leave(authToken, gameIdent);
+        try{
+            Thread.sleep(500);
+        } catch(InterruptedException e){
+            return "process interrupted before completion";
+        }
+        return "Left game successfully";
     }
 
     public String redraw() throws IOException {
