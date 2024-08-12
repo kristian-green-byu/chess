@@ -217,7 +217,7 @@ public class WebSocketHandler {
         if(color.equals(ChessGame.TeamColor.BLACK)){
             otherUser = game.whiteUsername();
         }
-        String resignMessage = String.format("%s has resigned. Game over. %s wins!", username, otherUser);
+        String resignMessage = String.format("%s has resigned. Game over. %s won!", username, otherUser);
         NotificationMessage notification = new NotificationMessage(resignMessage);
         connections.broadcast("", notification);
     }
