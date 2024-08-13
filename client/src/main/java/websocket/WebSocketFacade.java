@@ -181,12 +181,7 @@ public class WebSocketFacade extends Endpoint {
                 ChessPosition pos = new ChessPosition(colNum, rowNum);
                 boolean squareIsValidMove = false;
                 if(highlight && validMoves !=null){
-                    for(ChessMove move : validMoves){
-                        if (move.getEndPosition().equals(pos)) {
-                            squareIsValidMove = true;
-                            break;
-                        }
-                    }
+                    squareIsValidMove = isSquareIsValidMove(validMoves, pos, squareIsValidMove);
                 }
                 if(character == '|'){
                     continue;
@@ -208,45 +203,7 @@ public class WebSocketFacade extends Endpoint {
                     alt = true;
                 }
 
-                if(character == ' '){
-                    result.append(EMPTY);
-                }
-                else if(character == 'r'){
-                    result.append(SET_TEXT_COLOR_BLACK + BLACK_ROOK);
-                }
-                else if(character == 'n'){
-                    result.append(SET_TEXT_COLOR_BLACK + BLACK_KNIGHT);
-                }
-                else if(character == 'b'){
-                    result.append(SET_TEXT_COLOR_BLACK + BLACK_BISHOP);
-                }
-                else if(character == 'q'){
-                    result.append(SET_TEXT_COLOR_BLACK + BLACK_QUEEN);
-                }
-                else if(character == 'k'){
-                    result.append(SET_TEXT_COLOR_BLACK + BLACK_KING);
-                }
-                else if(character == 'p'){
-                    result.append(SET_TEXT_COLOR_BLACK + BLACK_PAWN);
-                }
-                else if(character == 'R'){
-                    result.append(SET_TEXT_COLOR_WHITE + WHITE_ROOK);
-                }
-                else if(character == 'N'){
-                    result.append(SET_TEXT_COLOR_WHITE + WHITE_KNIGHT);
-                }
-                else if(character == 'B'){
-                    result.append(SET_TEXT_COLOR_WHITE + WHITE_BISHOP);
-                }
-                else if(character == 'Q'){
-                    result.append(SET_TEXT_COLOR_WHITE + WHITE_QUEEN);
-                }
-                else if(character == 'K'){
-                    result.append(SET_TEXT_COLOR_WHITE + WHITE_KING);
-                }
-                else if(character == 'P'){
-                    result.append(SET_TEXT_COLOR_WHITE + WHITE_PAWN);
-                }
+                processChar(character, result);
                 if(color == ChessGame.TeamColor.BLACK){
                     rowNum--;
                 }
@@ -266,6 +223,58 @@ public class WebSocketFacade extends Endpoint {
         }
         result.append(topBorder);
         return result.toString();
+    }
+
+    private static void processChar(char character, StringBuilder result) {
+        if(character == ' '){
+            result.append(EMPTY);
+        }
+        else if(character == 'r'){
+            result.append(SET_TEXT_COLOR_BLACK + BLACK_ROOK);
+        }
+        else if(character == 'n'){
+            result.append(SET_TEXT_COLOR_BLACK + BLACK_KNIGHT);
+        }
+        else if(character == 'b'){
+            result.append(SET_TEXT_COLOR_BLACK + BLACK_BISHOP);
+        }
+        else if(character == 'q'){
+            result.append(SET_TEXT_COLOR_BLACK + BLACK_QUEEN);
+        }
+        else if(character == 'k'){
+            result.append(SET_TEXT_COLOR_BLACK + BLACK_KING);
+        }
+        else if(character == 'p'){
+            result.append(SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        }
+        else if(character == 'R'){
+            result.append(SET_TEXT_COLOR_WHITE + WHITE_ROOK);
+        }
+        else if(character == 'N'){
+            result.append(SET_TEXT_COLOR_WHITE + WHITE_KNIGHT);
+        }
+        else if(character == 'B'){
+            result.append(SET_TEXT_COLOR_WHITE + WHITE_BISHOP);
+        }
+        else if(character == 'Q'){
+            result.append(SET_TEXT_COLOR_WHITE + WHITE_QUEEN);
+        }
+        else if(character == 'K'){
+            result.append(SET_TEXT_COLOR_WHITE + WHITE_KING);
+        }
+        else if(character == 'P'){
+            result.append(SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        }
+    }
+
+    private static boolean isSquareIsValidMove(Collection<ChessMove> validMoves, ChessPosition pos, boolean squareIsValidMove) {
+        for(ChessMove move : validMoves){
+            if (move.getEndPosition().equals(pos)) {
+                squareIsValidMove = true;
+                break;
+            }
+        }
+        return squareIsValidMove;
     }
 
     @Override

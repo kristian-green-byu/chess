@@ -67,6 +67,8 @@ public class ChessClient {
             }
         } catch (IOException e) {
             result = e.getMessage();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
         return result;
     }
@@ -131,12 +133,7 @@ public class ChessClient {
                 return "Expected: <username> <password>";
             }
         } catch (Exception e){
-            if(e.getMessage().equals("401")){
-                return "Username or password is invalid. Please verify your inputs and try again";
-            }
-            else{
-                return "Request failed. Verify your inputs and try again";
-            }
+            return "Username or password is invalid";
         }
     }
 
@@ -175,8 +172,7 @@ public class ChessClient {
             var result = new StringBuilder();
             int gameStringID = 1;
             for (var game : games) {
-                result.append(gameStringID).append(". Name: ").append(game.gameName())
-                        .append(" White Player: ").append(game.whiteUsername())
+                result.append(gameStringID).append(". Name: ").append(game.gameName()).append(" White Player: ").append(game.whiteUsername())
                         .append(" Black Player: ").append(game.blackUsername()).append('\n');
                 gameStringID++;
             }
@@ -239,9 +235,7 @@ public class ChessClient {
                     teamColor = ChessGame.TeamColor.BLACK;
                 }
                 else{
-                    return "Please only write white to join " +
-                            "as white and black to join as black\n"
-                            +"Make sure you follow the format join <white|black> <gameNumber>";
+                    return "Request failed. Make sure you follow the format join <white|black> <gameNumber>";
                 }
                 if(isNotNumeric(params[1])){
                     return "You did not input a valid integer for <gameNumber>. Please try again";
@@ -267,18 +261,7 @@ public class ChessClient {
                 return "Expected: <white|black> <gameNumber>";
             }
         } catch (Exception e){
-            if(e.getMessage().equals("401")){
-                return "You are not logged in";
-            }
-            else if(e.getMessage().equals("400")){
-                return "Game doesn't exist";
-            }
-            else if(e.getMessage().equals("403")){
-                return "There is already a player of your requested color";
-            }
-            else{
-                return "Request failed. Verify your inputs and try again";
-            }
+            return "Request failed. Verify there isn't a player of your requested color and try again";
         }
     }
 
@@ -334,46 +317,33 @@ public class ChessClient {
                 return "Expected: <gameNumber>";
             }
         } catch (Exception e){
-            if(e.getMessage().equals("401")){
-                return "You are not logged in";
-            }
-            else {
                 return "Request failed. Verify your inputs and try again";
-            }
         }
     }
 
-    public String leave() throws IOException {
+    public String leave() throws IOException, InterruptedException {
         if (!inGame) {
             return "Join a game first to complete this request";
         }
         postLogin = true;
         inGame = false;
         ws.leave(authToken, gameIdent);
-        try{
-            Thread.sleep(500);
-        } catch(InterruptedException e){
-            return "process interrupted before completion";
-        }
+        Thread.sleep(500);
         observing = false;
         return "Left game successfully";
     }
 
-    public String redraw() throws IOException {
+    public String redraw() throws IOException, InterruptedException {
         if (!inGame) {
             return "Join a game first to redraw the board";
         }
         GameData gameData = getGameData(joinedGame);
         ws.redrawBoard(gameData, color);
-        try{
-            Thread.sleep(500);
-        } catch(InterruptedException e){
-            return "process interrupted before completion";
-        }
+        Thread.sleep(500);
         return "Board redrawn";
     }
 
-    public String move(String... params) throws IOException{
+    public String move(String... params) throws IOException, InterruptedException {
         if(!inGame){
             return "Join a game first to make a move";
         }
@@ -392,9 +362,6 @@ public class ChessClient {
         ChessPiece promotionPiece;
         ChessPiece currentPiece = chessGame.getBoard().getPiece(fromPos);
         ChessGame.TeamColor teamColor = currentPiece.getTeamColor();
-        if(color != teamColor){
-            return "You cannot move your opponent's pieces";
-        }
         ChessMove move = new ChessMove(fromPos, toPos, null);
         for(ChessMove posMov : validMoves){
             if(posMov.getPromotionPiece()!=null){
@@ -411,29 +378,18 @@ public class ChessClient {
                 break;
             }
         }
-        if(!validMoves.contains(move)){
-            return "Move is not possible";
-        }
         ws.makeMove(authToken, gameIdent, move);
-        try{
-            Thread.sleep(500);
-        } catch(InterruptedException e){
-            return "process interrupted before completion";
-        }
+        Thread.sleep(500);
         return "";
     }
 
-    public String resign() throws IOException {
+    public String resign() throws IOException, InterruptedException {
         ws.resign(authToken, gameIdent);
-        try{
-            Thread.sleep(500);
-        } catch(InterruptedException e){
-            return "process interrupted before completion";
-        }
+        Thread.sleep(500);
         return "Resigned successfully.";
     }
 
-    public String highlight(String... params) throws IOException{
+    public String highlight(String... params) throws IOException, InterruptedException {
         String pieceCord = params[0];
         if(invalidMoveFormat(pieceCord)){
             return "Coordinate formated incorrectly. " +
@@ -445,11 +401,7 @@ public class ChessClient {
         Collection<ChessMove> validMoves = chessGame.validMoves(piecePos);
         ws.displayLegalMoves(gameData, color, validMoves);
         ChessPiece piece = chessGame.getBoard().getPiece(piecePos);
-        try{
-            Thread.sleep(500);
-        } catch(InterruptedException e){
-            return "process interrupted before completion";
-        }
+        Thread.sleep(500);
         return String.format("Board highlighted for the %s on %s",piece.getPieceType(), pieceCord);
     }
 
