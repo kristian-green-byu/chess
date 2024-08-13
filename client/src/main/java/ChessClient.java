@@ -53,7 +53,7 @@ public class ChessClient {
                     case "list" -> listGames(authToken);
                     case "create" -> createGame(params);
                     case "join" -> joinGame(params);
-                    case "quit" -> "quit";
+                    case "quit" -> quit();
                     case "help" -> help();
                     case "observe" -> observe(params);
                     case "leave" -> leave();
@@ -68,6 +68,16 @@ public class ChessClient {
             result = e.getMessage();
         }
         return result;
+    }
+
+    public String quit() throws IOException {
+        if(inGame){
+            return "Leave your game and logout first to quit.";
+        }
+        else if(postLogin){
+            return "logout first to quit.";
+        }
+        return "quit";
     }
 
     public String register(String... params) throws IOException {
@@ -502,7 +512,6 @@ public class ChessClient {
                 join <WHITE|BLACK> <gameNumber> - join a chess game; list the games to find the game number
                 observe <gameNumber> - observe a chess game without playing; list the games to find the game number
                 logout - logout when finished
-                quit - close the chess client
                 help - receive a list of executable commands
                 """;
     }
@@ -523,7 +532,6 @@ public class ChessClient {
                 move <from> <to> - make a chess move
                 resign - forfeit the game
                 highlight <coordinate> - see legal moves for a given piece
-                quit - close the chess client
                 help - receive a list of executable commands
                 """;
     }
