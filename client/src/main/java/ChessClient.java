@@ -30,6 +30,7 @@ public class ChessClient {
     private final int port;
     private ChessGame.TeamColor color;
     private int gameIdent;
+    private boolean observing = false;
 
     public ChessClient(int port) {
         server = new ServerFacade("http://localhost:" + port);
@@ -326,6 +327,7 @@ public class ChessClient {
                 ws.joinGame(authToken, gameData.gameID());
                 gameIdent = gameData.gameID();
                 Thread.sleep(500);
+                observing = true;
                 return String.format("Observing game %d",desiredID);
             }
             else{
@@ -353,6 +355,7 @@ public class ChessClient {
         } catch(InterruptedException e){
             return "process interrupted before completion";
         }
+        observing = false;
         return "Left game successfully";
     }
 
@@ -373,6 +376,9 @@ public class ChessClient {
     public String move(String... params) throws IOException{
         if(!inGame){
             return "Join a game first to make a move";
+        }
+        if(observing) {
+            return "You may not move any pieces while observing a game";
         }
         String fromString = params[0];
         String toString = params[1];

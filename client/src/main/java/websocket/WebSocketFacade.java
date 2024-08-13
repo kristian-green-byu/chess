@@ -174,10 +174,13 @@ public class WebSocketFacade extends Endpoint {
         for (var line : boardString.split("\n")) {
             result.append(SET_BG_COLOR_WHITE).append(SET_TEXT_COLOR_BLACK).append(' ').append(colNum).append(' ');
             int rowNum = 1;
+            if(color == ChessGame.TeamColor.BLACK){
+                rowNum = 8;
+            }
             for(var character : line.toCharArray()) {
                 ChessPosition pos = new ChessPosition(colNum, rowNum);
                 boolean squareIsValidMove = false;
-                if(highlight){
+                if(highlight && validMoves !=null){
                     for(ChessMove move : validMoves){
                         if (move.getEndPosition().equals(pos)) {
                             squareIsValidMove = true;
@@ -244,7 +247,12 @@ public class WebSocketFacade extends Endpoint {
                 else if(character == 'P'){
                     result.append(SET_TEXT_COLOR_WHITE + WHITE_PAWN);
                 }
-                rowNum ++;
+                if(color == ChessGame.TeamColor.BLACK){
+                    rowNum--;
+                }
+                else{
+                    rowNum ++;
+                }
             }
             result.append(SET_BG_COLOR_WHITE).append(SET_TEXT_COLOR_BLACK).append(' ').append(colNum).append(' ');
             if(color == ChessGame.TeamColor.WHITE){
