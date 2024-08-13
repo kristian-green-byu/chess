@@ -69,7 +69,7 @@ public class SQLGameDAO implements GameDAO{
         return null;
     }
 
-    public void updateGame(String name, ChessGame.TeamColor playerColor, GameData gameData) throws DataAccessException {
+    public void joinGame(String name, ChessGame.TeamColor playerColor, GameData gameData) throws DataAccessException {
         if(name == null || gameData == null || playerColor == null){
             throw new DataAccessException("unauthorized");
         }
@@ -80,6 +80,10 @@ public class SQLGameDAO implements GameDAO{
         } else {
             newGame = new GameData(gameData.gameID(), gameData.whiteUsername(), name, gameData.gameName(), gameData.game());
         }
+        updateGameInSQL(gameData, games, newGame);
+    }
+
+    private void updateGameInSQL(GameData gameData, Collection<GameData> games, GameData newGame) throws DataAccessException {
         for (GameData game : games) {
             if(game.gameID() == gameData.gameID()) {
                 var statement = db.setDB("DELETE FROM %DB_NAME%.gameData WHERE gameID = ?");
@@ -98,5 +102,13 @@ public class SQLGameDAO implements GameDAO{
     public void clearGameData() throws DataAccessException {
         var statement = db.setDB("TRUNCATE %DB_NAME%.gameData");
         db.executeUpdate(statement);
+    }
+
+    public void updateGame(GameData gameData) throws DataAccessException {
+        if(gameData == null){
+            throw new DataAccessException("unauthorized");
+        }
+        Collection<GameData> games = getGames();
+        updateGameInSQL(gameData, games, gameData);
     }
 }

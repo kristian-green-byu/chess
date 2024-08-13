@@ -10,9 +10,11 @@ public interface GameDAO {
 
     GameData getGame(int gameID) throws DataAccessException;
 
-    void updateGame(String name, ChessGame.TeamColor playerColor, GameData gameData) throws DataAccessException;
+    void joinGame(String name, ChessGame.TeamColor playerColor, GameData gameData) throws DataAccessException;
 
     Collection<GameData> listGames() throws DataAccessException;
 
     void clearGameData() throws DataAccessException;
+
+    void updateGame(GameData gameData) throws DataAccessException;
 }

@@ -31,7 +31,7 @@ public class MemoryGameDAO implements GameDAO {
         return null;
     }
 
-    public void updateGame(String newName, ChessGame.TeamColor playerColor, GameData gameData) {
+    public void joinGame(String newName, ChessGame.TeamColor playerColor, GameData gameData) {
         int id = 1;
         for (GameData game : games.values()) {
             if (gameData == game) {
@@ -53,6 +53,8 @@ public class MemoryGameDAO implements GameDAO {
     public Collection<GameData> listGames() {
         return games.values();
     }
+
+    public void updateGame(GameData gameData){}
 
     public void clearGameData() {
         games.clear();

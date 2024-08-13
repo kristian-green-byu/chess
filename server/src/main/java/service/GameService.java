@@ -61,7 +61,7 @@ public class GameService {
                 throw new DataAccessException("already taken");
             }
         }
-        gameDAO.updateGame(authData.username(), joinGameRequest.playerColor(), gameData);
+        gameDAO.joinGame(authData.username(), joinGameRequest.playerColor(), gameData);
         return new JoinGameResponse();
     }
 

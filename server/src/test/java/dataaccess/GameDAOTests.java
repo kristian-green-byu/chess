@@ -55,19 +55,19 @@ public class GameDAOTests {
     }
 
     @Test
-    public void updateGameSuccess() throws DataAccessException{
+    public void joinGameSuccess() throws DataAccessException{
         int gameID = gameDAO.createGame("Fun Game");
         GameData game = gameDAO.getGame(gameID);
-        gameDAO.updateGame("Bob", ChessGame.TeamColor.WHITE, game);
+        gameDAO.joinGame("Bob", ChessGame.TeamColor.WHITE, game);
         GameData gameUpdated = gameDAO.getGame(gameID);
         assert Objects.equals(gameUpdated.whiteUsername(), "Bob");
     }
 
     @Test
-    public void updateGameInvalidName() throws DataAccessException{
+    public void joinGameInvalidName() throws DataAccessException{
         int gameID = gameDAO.createGame("Chess1");
         GameData game = gameDAO.getGame(gameID);
-        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.updateGame(null, ChessGame.TeamColor.WHITE, game));
+        Assertions.assertThrows(DataAccessException.class, () -> gameDAO.joinGame(null, ChessGame.TeamColor.WHITE, game));
     }
 
     @Test

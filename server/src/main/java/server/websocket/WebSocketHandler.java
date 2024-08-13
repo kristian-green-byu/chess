@@ -83,7 +83,7 @@ public class WebSocketHandler {
             sendInvalidMoveError(username);
             return;
         }
-        gameDAO.updateGame(username, moveColor, game);
+        gameDAO.joinGame(username, moveColor, game);
         var loadGame = new LoadGameMessage(game);
         connections.broadcast("", loadGame, gameID);
         var moveNotify = getMoveNotification(username, move);
@@ -216,7 +216,7 @@ public class WebSocketHandler {
             return;
         }
         game.game().end();
-        gameDAO.updateGame(username, color, game);
+        gameDAO.joinGame(username, color, game);
         String otherUser = game.blackUsername();
         if(color.equals(ChessGame.TeamColor.BLACK)){
             otherUser = game.whiteUsername();
@@ -264,14 +264,10 @@ public class WebSocketHandler {
         }
         ChessGame.TeamColor color = getUserColor(game, username);
         GameData newGame = new GameData(gameID, game.whiteUsername(), null, game.gameName(), game.game());
-        String otherUser = game.whiteUsername();
-        ChessGame.TeamColor otherColor = ChessGame.TeamColor.WHITE;
         if(color==ChessGame.TeamColor.WHITE){
             newGame = new GameData(gameID, null, game.blackUsername(), game.gameName(), game.game());
-            otherUser = game.blackUsername();
-            otherColor = ChessGame.TeamColor.BLACK;
         }
-        gameDAO.updateGame(otherUser, otherColor, newGame);
+        gameDAO.updateGame(newGame);
         connections.remove(username);
         var message = String.format("%s left the game", username);
         var notification = new NotificationMessage(message);
@@ -280,7 +276,7 @@ public class WebSocketHandler {
 
     private static ChessGame.TeamColor getUserColor(GameData game, String username) {
         ChessGame.TeamColor color = ChessGame.TeamColor.WHITE;
-        if(game.blackUsername().equals(username)){
+        if(game.blackUsername()!=null && game.blackUsername().equals(username)){
             color = ChessGame.TeamColor.BLACK;
         }
         return color;
