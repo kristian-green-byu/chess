@@ -57,8 +57,8 @@ public class WebSocketHandler {
             return;
         }
         //check to make sure that user is in game
-        ChessGame.TeamColor moveColor = game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
-        if (checkIfInGame(moveColor, game, username)){
+
+        if (checkIfInGame(game, username)){
             return;
         }
         if(checkIfGameOver(game, username)){
@@ -71,6 +71,7 @@ public class WebSocketHandler {
             return;
         }
         // check to make sure move is in turn
+        ChessGame.TeamColor moveColor = game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
         if(game.game().getTeamTurn()!=moveColor){
             var error = new ErrorMessage("Error: Move out of turn");
             connections.sendMessageToUser(username, error);
@@ -209,7 +210,7 @@ public class WebSocketHandler {
         if(Objects.equals(game.blackUsername(), username)){
             color = ChessGame.TeamColor.BLACK;
         }
-        if (checkIfInGame(color, game, username)){
+        if (checkIfInGame(game, username)){
             return;
         }
         if(checkIfGameOver(game, username)){
@@ -226,18 +227,10 @@ public class WebSocketHandler {
         connections.broadcast("", notification, gameID);
     }
 
-    private boolean checkIfInGame(ChessGame.TeamColor color, GameData game, String username) throws IOException {
-        if(color ==ChessGame.TeamColor.BLACK){
-            if(!Objects.equals(game.blackUsername(), username)){
-                sendUserNotInGameError(username);
-                return true;
-            }
-        }
-        else{
-            if(!Objects.equals(game.whiteUsername(), username)){
-                sendUserNotInGameError(username);
-                return true;
-            }
+    private boolean checkIfInGame(GameData game, String username) throws IOException {
+        if(!Objects.equals(game.blackUsername(), username) && !Objects.equals(game.whiteUsername(), username)){
+            sendUserNotInGameError(username);
+            return true;
         }
         return false;
     }
