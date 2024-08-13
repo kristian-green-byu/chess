@@ -314,6 +314,7 @@ public class ChessClient {
                 joinedGame = desiredID;
                 ws = new WebSocketFacade("http://localhost:" + port);
                 ws.joinGame(authToken, gameData.gameID());
+                gameIdent = gameData.gameID();
                 Thread.sleep(500);
                 return String.format("Observing game %d",desiredID);
             }
