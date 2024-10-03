@@ -179,7 +179,7 @@ public class WebSocketHandler {
         }
         var loadGame = new LoadGameMessage(game);
         connections.sendMessageToUser(username, loadGame);
-        if(!game.whiteUsername().equals(username) && !game.blackUsername().equals(username)){
+        if(!username.equals(game.whiteUsername()) && !username.equals(game.blackUsername())){
             var message = String.format("%s is observing the game", username);
             var notification = new NotificationMessage(message);
             connections.broadcast(username, notification, gameID);
@@ -268,7 +268,10 @@ public class WebSocketHandler {
     }
 
     private static ChessGame.TeamColor getUserColor(GameData game, String username) {
-        ChessGame.TeamColor color = ChessGame.TeamColor.WHITE;
+        ChessGame.TeamColor color = null;
+        if(game.whiteUsername()!=null && game.whiteUsername().equals(username)){
+            color = ChessGame.TeamColor.WHITE;
+        }
         if(game.blackUsername()!=null && game.blackUsername().equals(username)){
             color = ChessGame.TeamColor.BLACK;
         }

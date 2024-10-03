@@ -384,9 +384,17 @@ public class ChessClient {
     }
 
     public String resign() throws IOException, InterruptedException {
-        ws.resign(authToken, gameIdent);
-        Thread.sleep(500);
-        return "Resigned successfully.";
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Are you sure you want to resign? Type yes for yes and no for no."+
+                SET_TEXT_BLINKING + RESET_TEXT_COLOR + "\n" + RESET_TEXT_BOLD_FAINT
+                + ">>> " + SET_TEXT_COLOR_GREEN);
+        String pieceString = scanner.nextLine();
+        if(pieceString.equals("yes")){
+            ws.resign(authToken, gameIdent);
+            Thread.sleep(500);
+            return "Resigned successfully.";
+        }
+        return "You are no longer resigning";
     }
 
     public String highlight(String... params) throws IOException, InterruptedException {
